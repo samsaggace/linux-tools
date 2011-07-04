@@ -1,0 +1,238 @@
+"#####################
+"# VIM CONFIGURATION #
+"#####################
+
+"-------------------------------------------------------------------------
+"Color and font
+so $VIMRUNTIME/colors/desert.vim
+
+set guifont=Monospace\ 9
+
+" Font
+set gfn=Monospace\ 9
+
+" enable syntax highlighting
+syntax on
+
+
+"-------------------------------------------------------------------------
+"Colorsheme Scroller, Chooser, and Browser
+source $VIMRUNTIME/plugin/ScrollColor.vim
+source $VIMRUNTIME/plugin/color_sample_pack.vim
+
+
+"-------------------------------------------------------------------------
+" Various
+"Allow special Vim improvements like multiple-undo
+set nocompatible
+
+"Set improve Backspace
+set bs=2
+
+" visualbell
+set visualbell
+
+"Show the current edition mode on last line, number of column and line
+set showmode
+set ruler
+set nu
+set ls=2
+
+" Set indentation corresponding to filetype
+filetype indent on
+
+" Make command line two lines high
+"set ch=2
+
+" Highlight search strings
+set hlsearch
+
+" "search as we type" on
+set incsearch
+
+" cindent option
+set cinoptions=t0,(0,W4,l1,g0,hs
+
+" I starts at the first non-blank character
+set cpoptions+=H
+
+" highlighting strings inside C comments
+let c_comment_strings=1
+
+" Backup dir
+set aw
+
+set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc
+
+set listchars+=tab:\|-
+
+
+"---------------------------------------------------------------------------
+" Mapping
+map <F2>          :call Show80col()<CR>
+map <F3>          :TlistUpdate<CR>
+map <F4>          :TlistToggle<CR>
+map <F5>          ^i/* <C-[>$a */<C-[>
+map <F6>          ^3x$2h3x
+map <F7>          :bdelete<CR>
+map <F9>          :noh<CR>
+map <C-N>         :noh<CR>
+map <C-Del>       :bdelete<CR>
+map <C-PageUp>    [c
+map <C-PageDown>  ]c
+
+map ,l            :so ~/.vimrc<CR>
+map ,#            :s/^/#/<CR><C-N>
+map ,/            :s@^@//@<CR><C-N>
+map ,"            :s@^@"@<CR><C-N>
+map ,c            :set filetype=c<CR>
+map ,z            :set filetype=zsh<CR>
+map ,m            :set filetype=make<CR>
+
+
+" --------------------------------------------------------------------------
+" Cscope 
+if has("cscope")
+	" change this to 1 to search ctags DBs first
+	set csto=0
+	set cst
+	set nocsverb
+	" add any database in current directory
+	if filereadable(".vimtags/cscope.out")
+	    cs add .vimtags/cscope.out
+	" else add database pointed to by environment
+	elseif $CSCOPE_DB != ""
+	    cs add $CSCOPE_DB
+	endif
+	set csverb
+
+	" Using 'CTRL-AltGr \' then a search type makes the vim window
+	" "shell-out", with search results displayed on the bottom
+
+	nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
+	nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+	nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+
+	" Using 'CTRL-AltGr ^' then a search type makes the vim window
+	" split horizontally, with search result displayed in
+	" the new window.
+
+	nmap <C-^>s :vert scs find s <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-^>g :vert scs find g <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-^>c :vert scs find c <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-^>t :vert scs find t <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-^>e :vert scs find e <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-^>f :vert scs find f <C-R>=expand("<cfile>")<CR><CR>
+	nmap <C-^>i :vert scs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+	nmap <C-^>d :vert scs find d <C-R>=expand("<cword>")<CR><CR>
+endif
+
+
+"--------------------------------------------------------------------------
+" Omnicompletion, needs tags
+set omnifunc=ccomplete#Complete
+set shiftwidth=4 tabstop=4 expandtab
+
+if $VIMTAGSPATH != ""
+   set tags+=$VIMTAGSPATH/tags
+elseif filereadable(".vimtags/tags") 
+   set tags+=.vimtags/tags
+endif
+
+source $VIMRUNTIME/autoload/ccomplete.vim
+
+
+"---------------------------------------------------------------------------
+" tab completion from tags or cscope
+function! InsertTabWrapper(direction)
+    let col = col('.') - 1
+    if !col || getline('.')[col - 1] =~ '\s'
+        return "\<Tab>"
+    elseif "backward" == a:direction
+        return "\<C-P>"
+    else
+        return "\<C-N>"
+    endif
+endfunction
+
+inoremap <Tab> <C-R>=InsertTabWrapper("forward")<cr>
+inoremap <s-tab> <C-R>=InsertTabWrapper("backward")<cr>
+inoremap <leader><Tab> <Tab>
+
+"Completion in commands like 
+cnoremap <Tab> <C-L><C-D>
+
+" Mini buffer explorer plugin
+" -------------------------------------------------------------------------
+let g:miniBufExplMapWindowNavVim = 1 
+let g:miniBufExplMapWindowNavArrows = 1 
+let g:miniBufExplMapCTabSwitchBufs = 1 
+let g:miniBufExplModSelTarget = 1
+
+" Do not save modified buffer when switching
+set hidden
+
+
+"---------------------------------------------------------------------------
+" Diff style
+if &diff
+    au BufWritePost * diffupdate
+endif
+
+highlight DiffText guifg=black 
+
+
+"---------------------------------------------------------------------------
+"Highlight when line > 80 columns
+
+let g:isshow = 0
+
+function! Show80col()
+    if g:isshow == 0
+      let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+      let g:isshow = 1
+      echo 'Showing lines with more than 80 columns'
+    else
+      call matchdelete(w:m2)
+      let g:isshow = 0
+      echo 'Hiding lines with more than 80 columns'
+    endif
+endfunction
+
+
+"-------------------------------------------------------------------------
+"Highlight Patch like TODO :
+au BufNewFile,BufRead *.c,*.h,*.cpp,*.patch 
+ \ let g:m4=matchadd('Todo', '\c/\*.*PATCH.*', -1) |
+ \ let g:m5=matchadd('Todo', '\c//.*PATCH.*', -1)
+
+au BufNewFile,BufRead Makefile*,GNUmakefile*,*.mk,*.patch,*.mak 
+ \ let g:m6=matchadd('Todo', '\c#.*PATCH.*', -1)
+
+let g:netrw_altv = 1
+let g:netrw_alto = 1
+
+" Load Dowygen syntax automaticaly
+let g:load_doxygen_syntax=1
+
+"-------------------------------------------------------------------------
+" force use of tabs in Makefiles and python
+au BufNewFile,BufRead Makefile*,GNUmakefile*,*.mk,*.mak,makefile*,*.py
+    \ set shiftwidth=4 tabstop=4 noexpandtab
+
+" GPG plugin options
+"  - ASCII armor, signed, asymetric keys, gpg_agent by default
+let g:GPGPreferArmor=1
+let g:GPGPreferSign=1
+let g:GPGPreferSymmetric=0
+let g:GPGUseAgent=1
+
+" Remove newline added by vim automatically at end-of-file
+set noeol
+
+

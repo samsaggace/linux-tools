@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: pybugz
+Version: 0.8.0
+Summary: python interface to bugzilla
+Home-page: http://www.liquidx.net/pybuggz
+Author: Alastair Tse
+Author-email: alastair@liquidx.net
+License: GPL-2
+Description: UNKNOWN
+Platform: any

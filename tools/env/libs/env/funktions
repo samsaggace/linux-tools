@@ -1,0 +1,265 @@
+. $LIBS_PATH/debug
+
+#------------------------------------------------------------------------------
+# Shell
+#------------------------------------------------------------------------------
+
+shell-name ()
+{
+   \ps -o cmd --pid=$$ | tail -1
+   return $?
+}
+
+#------------------------------------------------------------------------------
+printvar()
+{
+  typeset strVarName
+  typeset strVarVal
+  for arg ; do
+    strVarName=$arg
+    eval strVarVal="\$$strVarName"
+    echo "$strVarName=$strVarVal"
+  done
+  return 0
+}
+
+#------------------------------------------------------------------------------
+timeout()
+{ 
+   perl -e 'alarm shift; exec @ARGV' "$@";
+}
+
+
+#------------------------------------------------------------------------------
+#Compilation environement
+#------------------------------------------------------------------------------
+
+mkenv () {
+   if [ "$REF_NAME" = "" ]; then
+      disp-warn "REF_NAME not set. Please enter the sources directory name."
+      echo -n "<Enter> will take \"_ref\" as default :  "
+      read choice1
+      if [ "$choice1" != "" ]; then
+         REF_NAME="$choice1"
+      else
+         REF_NAME="_ref"
+      fi
+   fi
+
+   if [ "$CONF_NAME" = "" ]; then
+      echo "CONF_NAME not set - please choose a config in the list : "
+      lsconf
+      echo -n "Enter your choice : "
+      read choice2
+      CONF_NAME="$choice2"
+   fi
+
+   old_path=`pwd`
+   mkpath=`pwd | sed "s@\(.*\)/$REF_NAME.*@\1@"`
+   cd $mkpath;
+
+   if [ "$1" = "-cp" ]; then
+      shift;
+      makecpenv.sh $REF_NAME $CONF_NAME $@;
+   else
+      makecpenv.sh -c $REF_NAME $CONF_NAME $@;
+   fi
+   cd $old_path;
+
+}
+
+#------------------------------------------------------------------------------
+swconf ()
+{
+   old_conf=$CONF_NAME
+   if [ -z "$1" ]; then
+      lsconf
+      echo -n "Enter your choice : "
+      read choice2
+      CONF_NAME="$choice2"
+   else
+      CONF_NAME="$1"
+   fi
+   disp-info "Changing Config from \"$old_conf\" to \"$CONF_NAME\""
+}
+
+#------------------------------------------------------------------------------
+lsconf ()
+{
+   if [ -z "$REF_NAME" ]; then
+      disp-warn "REF_NAME not set. Please set the sources directory name first."
+   else
+      mkpath=`pwd | sed "s@\(.*\)/$REF_NAME.*@\1@"`
+      disp-info "-------> Available config (current config appears in ${COL_YELLOW}yellow${COL_RST}) <-------"
+      if [ -z "$CONF_NAME" ]; then
+         find $mkpath/$REF_NAME/config -regex ".*\.config$" -printf "%f\n" | sed 's/\.config$//g'
+      else
+         find $mkpath/$REF_NAME/config -regex ".*\.config$" -printf "%f\n" | sed 's/\.config$//g' | sed "s/$CONF_NAME/${COL_YELLOW}&${COL_RST}/g"
+      fi
+      disp-info "--------------------------------------------------------------------------------------------"
+   fi
+}
+
+#------------------------------------------------------------------------------
+swref ()
+{
+   disp-info "Changing Sources directory from \"$REF_NAME\" to \"$1\""
+   REF_NAME="$1"
+}
+
+
+#------------------------------------------------------------------------------
+# LDAP
+#------------------------------------------------------------------------------
+
+ldaputils-installed()
+{
+   if [ "`which ldapsearch | grep 'not found'`" != "" ]; then
+      return 255
+   fi
+   echo "y"
+   return 0
+}
+
+#------------------------------------------------------------------------------
+ldap-search()
+{
+   if [ -z "`ldaputils-installed`" ]; then
+      disp-error "ldaputils not install (sudo apt-get install ldap-utils)"
+      return 10
+   fi
+
+   if [ -z "$1" ]; then
+      disp-info "Usage : ldap-search <BASEDN> [Pattern]"
+      disp-info "Ex    : ldap-search \"ou=people,dc=scom,dc=sagem\" \"mail=*laurent*\""
+      disp-info "Ex    : ldap-search \"$LDAP_BASEDN\" \"forgeName=forge-urd44\""
+      return 11
+   fi
+
+   ldapsearch -x -h $SRV_LDAP -b "$@"
+   return $?
+}
+
+#------------------------------------------------------------------------------
+ldap-searchx()
+{
+   if [ -z "$1" ]; then
+      disp-info "Usage : ldap-searchx <Pattern>"
+      disp-info "Ex    : ldap-searchx \"memberUid=g095701\""
+      disp-info "Ex    : ldap-searchx \"ou=*hdmi*\""
+      disp-info "Ex    : ldap-searchx \"forgeName=forge-urd44\""
+      return 11
+   fi
+
+   ldap-search $LDAP_BASEDN "$@" 
+   return $?
+}
+
+#------------------------------------------------------------------------------
+ldap-searchpeople()
+{
+   if [ -z "$1" ]; then
+      disp-info "Usage : ldap-searchpeople <FilterPattern>"
+      disp-info "Ex    : ldap-searchpeople \"uid=*957*\""
+      return 11
+   fi
+
+   ldap-search $LDAP_BASEDN_PEOPLE "$@"
+   return $?
+}
+
+#------------------------------------------------------------------------------
+ldap-userinfos()
+{
+   if [ -z "$1" ]; then
+      disp-info "Usage : ldap-userinfos <NamePattern> [FilterPattern]"
+      disp-info "Ex    : ldap-userinfos nguessan"
+      disp-info "Ex    : ldap-userinfos nguessan displayName"
+      return 11
+   fi
+
+   Pattern="*$1*"
+   shift
+
+   ldap-searchpeople "displayName=$Pattern" "$@"
+   return $?
+}
+
+
+#------------------------------------------------------------------------------
+ldap-uidinfos()
+{
+   if [ -z "$1" ]; then
+      disp-info "Usage : ldap-uidinfos <UidPattern> [FilterPattern]"
+      disp-info "Ex    : ldap-uidinfos g095 homeDirectory"
+      disp-info "Ex    : ldap-uidinfos g095701"
+      return 11
+   fi
+
+   Pattern="*$1*"
+   shift
+
+   ldap-searchpeople "uid=$Pattern" "$@"
+   return $?
+}
+
+
+#------------------------------------------------------------------------------
+ldap-uidmail()
+{
+   if [ -z "$1" ]; then
+      disp-info "Usage : ldap-uidmail <UidPattern> [-u]"
+      disp-info "Ex    : ldap-uidmail g095701"
+      disp-info "Ex    : ldap-uidmail g095701 -u"
+      disp-info "Ex    : ldap-uidmail g095    -u"
+      return 20
+   fi
+
+   Infos=`ldap-uidinfos "$1" mail`
+   if [ $? -ne 0 ]; then
+      disp-error "$Infos"
+      return 21
+   fi
+
+   Mail=`echo "$Infos" | grep '^mail' | awk -F 'mail:[[:space:]]*' '{print $2}'`
+
+   if [ "$2" = "-u" ]; then
+      declare -i NbEntry="`echo "$Infos" | grep . -c`"
+      declare -a UidTab="`echo "$Infos" | grep '^uid' | awk -F 'uid:[[:space:]]*' '{print $2}'`"
+      declare -a MailTab="$Mail"
+
+      while [ $NbEntry -gt 0 ]; do
+         echo "${UidTab[$NbEntry]}: ${MailTab[$NbEntry]}"
+         NbEntry=$NbEntry-1
+      done
+   else
+      echo "$Mail"
+   fi
+   return $?
+}
+
+
+#------------------------------------------------------------------------------
+ldap-myinfos()
+{
+   ldap-uidinfos $USER "$@"
+   return $?
+}
+
+
+#------------------------------------------------------------------------------
+ldap-mymail()
+{
+   ldap-uidmail $USER
+   return $?
+}
+
+
+#------------------------------------------------------------------------------
+#Highlight anything with a pipe 
+#------------------------------------------------------------------------------
+
+hl ()
+{
+   sed "s/$1/\o033[1;31m&\o033[m/g"
+}

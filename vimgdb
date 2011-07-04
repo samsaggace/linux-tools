@@ -1,0 +1,200 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use Socket;
+use Carp;
+
+use POSIX qw(tmpnam);
+
+my $SOCK_NAME = 'vimgdb.soc';
+
+my $VIM_EXE = 'gvim --nofork';
+my $GEN_LOG = 0;
+my $START_VIM = 1;
+
+my $fname  = "sureshkumar";
+my $lname  = "manimuthu";
+my $domine = "gmail";
+my $suffix = "com";
+my $ERROR_FILE = "vimgdb.err";
+
+print "\nvimgdb 1.2 (send your feedbacks to $fname.$lname\@$domine.$suffix)\n\n";
+
+if(@ARGV < 1)
+{
+	if($START_VIM == 0)
+	{
+		exec($VIM_EXE, ' -c "runtime misc/vimgdb_tcp.vim" -c \'call Gdb_interf_init()\'');
+	}
+	else
+	{
+		printf STDERR "Please specify the exe file\n";
+	}
+}
+
+my $gdb_task;
+my $msg_task;
+
+print "Setup PIMES\n";
+
+pipe(FROM_VIM, TO_GDB);  # setup pipes for communication
+pipe(FROM_GDB, TO_VIM);
+
+print "Staring GDB\n";
+
+unless(defined($gdb_task = fork()))
+{
+	die("Unable to fork");
+}
+
+if($gdb_task == 0)
+{
+	#print "GDB Task\n";
+	close FROM_VIM;
+	close TO_VIM;
+
+	open(STDOUT, ">&TO_GDB")     || die "Can't redirect stdout";
+	open(STDERR, ">$ERROR_FILE") || die "Can't redirect stdout";
+    open(STDIN, "<&FROM_GDB")    || die "Can't redirect stdin";
+
+	select(TO_GDB);    $| = 1; # make unbuffered
+	select(STDOUT);    $| = 1; # make unbuffered
+
+	if(system("mipsel-linux-gdb", "-f", "-q", "--args", @ARGV) != 0)
+	{
+		print STDERR "GDB Init Error !!!\n";
+
+		kill(15, getppid());
+	}
+
+	exit -1;
+}
+
+print "Staring Message Task\n";
+
+unless(defined($msg_task = fork()))
+{
+	die("Unable to fork");
+}
+
+if($msg_task == 0)
+{
+	close FROM_GDB;
+	close TO_GDB;
+
+	if($GEN_LOG)
+	{
+		open(LOGFILE, ">", "vimgdb.log") || die("Unable to open log file");
+		select(LOGFILE); $| = 1;
+	}
+
+	select(TO_VIM);    $| = 1; # make unbuffered
+
+    print TO_VIM "set prompt (gdb)\\n\n";
+
+	while(<FROM_VIM>)
+	{
+		chomp();
+		if(/^\(gdb\)/ || /^The program is running\.  Exit anyway/)
+		{
+			last;
+		}
+	}
+
+	socket(Server, PF_UNIX,SOCK_STREAM, 0) || die "socket: $!";
+
+	unlink($SOCK_NAME);
+
+	bind(Server, sockaddr_un($SOCK_NAME)) || die "bind: $!";
+
+	listen(Server, 1) || die "listen: $!";
+
+	while(accept(Client,Server))
+	{
+		select(Client);  $| = 1;
+
+		while(1)
+		{
+			my $line = <Client>;
+
+			if(!defined($line))
+			{
+				exit -1;
+			}
+
+			if($line =~ /^$/)
+			{
+				last;
+			}
+
+			chomp($line);
+
+			if($GEN_LOG)
+			{
+				print LOGFILE "<<", $line, "\n";
+			}
+
+			print TO_VIM $line, "\n";
+
+			while(1)
+			{
+				my $gdb_line = <FROM_VIM>;
+				if(!defined($gdb_line))
+				{
+					exit -1;
+				}
+
+				chomp($gdb_line);
+
+				if($GEN_LOG)
+				{
+					print LOGFILE ">> ", $gdb_line, "\n";
+				}
+
+				print Client $gdb_line, "\n";
+
+				if($gdb_line =~ /^The program is running\.  Exit anyway/)
+				{
+					exit -1;
+				}
+
+				if($gdb_line =~ /^\(gdb\)/)
+				{
+					last;
+				}
+			}
+		}
+
+		close(Client);
+	}
+
+	exit -1;
+}
+
+if($START_VIM)
+{
+	print "Staring VIM\n";
+
+	system($VIM_EXE . ' -c "runtime misc/vimgdb.vim" -c "call Gdb_interf_init()"');
+
+	print TO_VIM "quit\n";
+
+	kill(15, $gdb_task, $msg_task);
+}
+
+while(wait() != -1)
+{
+}
+
+if(open(OUT, "<", $ERROR_FILE))
+{
+	while(<OUT>)
+	{
+		print;
+	}
+}
+
+unlink ($ERROR_FILE);
+
+unlink ($SOCK_NAME);

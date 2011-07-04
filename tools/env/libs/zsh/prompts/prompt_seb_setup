@@ -1,0 +1,221 @@
+
+#------------------------------------------------------------------------------
+# Prompt help
+#------------------------------------------------------------------------------
+prompt_seb_help () {
+   cat << EOH
+Seb standard prompt      
+EOH
+}
+
+#------------------------------------------------------------------------------
+# Prompt preview
+#------------------------------------------------------------------------------
+prompt_seb_preview () {
+   prompt_preview_theme seb
+}
+
+#------------------------------------------------------------------------------
+# Global variable needed for hooks
+#------------------------------------------------------------------------------
+declare -x PromptSebPromptSebCmdTimeProcess="no"
+declare -x PromptSebCmdLaunched="no"
+declare -x PromptSebTimeUnity=""
+
+declare -ix PromptSebCmdTime=0
+declare -ix PromptSebTimeMs=0
+declare -ix PromptSebTimeSec=0
+
+declare -ix PromptSebTimeRemindMs=0
+declare -ix PromptSebTimeRemindSec=0
+
+#------------------------------------------------------------------------------
+# Prompt setup
+#------------------------------------------------------------------------------
+prompt_seb_setup () {
+   autoload colors zsh/terminfo
+
+   if [[ "$terminfo[colors]" -ge 8 ]] {
+       colors
+   }
+
+   PR_NO_COLOR="%{$terminfo[sgr0]%}"
+   for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE BLACK; do
+       eval PR_$color='$PR_NO_COLOR%{$terminfo[bold]$fg[${(L)color}]%}'
+       eval PR_L$color='$PR_NO_COLOR%{$fg[${(L)color}]%}'
+       (( count = $count + 1 ))
+   done
+
+   PR_LINE_COLOR=$PR_BLUE
+   PR_PTS_COLOR=$PR_BLUE
+   PR_PWD_COLOR=$PR_CYAN
+   PR_LOGIN_COLOR=$PR_GREEN
+   PR_HOST_COLOR=$PR_MAGENTA
+   PR_HISTORY_COLOR=$PR_YELLOW
+   PR_ERROR_COLOR=$PR_RED
+   PR_CT_COLOR=$PR_YELLOW
+   PR_TIME_COLOR=$PR_WHITE
+   PR_PS2_COLOR=$PR_YELLOW
+
+   typeset -A altchar
+   set -A altchar ${(s..)terminfo[acsc]}
+   PR_SET_CHARSET="%{$terminfo[enacs]%}"
+   PR_IN="%{$terminfo[smacs]%}"
+   PR_OUT="%{$terminfo[rmacs]%}"
+   PR_HB=$PR_LINE_COLOR$PR_IN${altchar[q]:--}$PR_OUT
+   PR_HB_FILL=${altchar[q]:--}
+   PR_UL=$PR_LINE_COLOR$PR_IN${altchar[l]:--}$PR_OUT
+   PR_LL=$PR_LINE_COLOR$PR_IN${altchar[m]:--}$PR_OUT
+   PR_LR=$PR_LINE_COLOR$PR_IN${altchar[j]:--}$PR_OUT
+   PR_UR=$PR_LINE_COLOR$PR_IN${altchar[k]:--}$PR_OUT
+
+
+   if [[ "$HOST" != "$MYHOST" ]] {
+     PR_HOST_COLOR=$PR_RED
+   }
+   if [[ "$USER" != "$MATRICULE" ]] {
+     PR_LOGIN_COLOR=$PR_RED
+   }
+   if [[ "$SHLVL" != "3" ]] {
+     PR_PTS_COLOR=$PR_RED
+   }
+
+   seb_setup_prompt
+
+   PROMPT='$PR_SET_CHARSET\
+$PR_UL$PR_PTS$PR_PWD$PR_IN${(e)PR_FILLBAR}$PR_OUT$PR_LOGIN$PR_HOST$PR_UR
+$PR_LL$PR_HISTERR$PR_HB$PR_NO_COLOR '
+
+   RPROMPT='$PR_NO_COLOR $PR_HB$PR_CT${vcs_info_msg_0_}$PR_NO_COLOR$PR_TIME$PR_LR$PR_NO_COLOR'
+
+   PS2='$PR_PS2$PR_NO_COLOR '
+
+#------------------------------------------------------------------------------
+   precmd () {
+      setopt prompt_subst
+# For command time
+      PromptSebCmdTime=0
+      PromptSebTimeUnity=""
+
+         if [[ "$PromptSebPromptSebCmdTimeProcess" = "yes" ]] && [[ "$PromptSebCmdLaunched" = "yes" ]] {
+            PromptSebCmdLaunched="no"
+            PromptSebTimeMs=`date +%N`
+            PromptSebTimeSec=$SECONDS
+            PromptSebCmdTime="$PromptSebTimeSec - $PromptSebTimeRemindSec"
+            PromptSebTimeUnity=" s"
+
+            if [[ $PromptSebCmdTime -lt 1 ]] {
+               PromptSebCmdTime="$PromptSebTimeMs - $PromptSebTimeRemindMs"
+               PromptSebCmdTime=$PromptSebCmdTime/1000000
+               PromptSebTimeUnity=" ms"
+            }
+        }
+      seb_setup_prompt
+
+    if [[ -z $(git ls-files --other --exclude-standard 2> /dev/null) ]] {
+        zstyle ':vcs_info:*' formats '%F{cyan}[%b%c%u%B%F{cyan}]'
+    } else {
+        zstyle ':vcs_info:*' formats '%F{yellow}[%b%c%u%B%F{yellow}●%F{yellow}]'
+    }
+
+      vcs_info
+
+      # Reset WINCH trap
+      functions[TRAPWINCH]="zle && seb_setup_prompt && zle reset-prompt"
+
+      # Dcop
+      if [ "$USE_DCOP_IN_SebRIVERS_PROMPT" = "y" ]; then
+         if [ "$KONSOLE_DCOP_SESSION" != "" ]; then
+            konsoleId=$(echo $KONSOLE_DCOP_SESSION | sed 's/DCOPRef(\([a-zA-Z0-9_-]*\),\([a-zA-Z0-9_-]*\))/\1/g')
+            sessionId=$(echo $KONSOLE_DCOP_SESSION | sed 's/DCOPRef(\([a-zA-Z0-9_-]*\),\([a-zA-Z0-9_-]*\))/\2/g')
+            tabName="${PWD[-20,-1]}"
+            dcop $konsoleId $sessionId renameSession "$tabName" 2> /dev/null
+         fi
+      fi
+   }
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+   preexec(){
+# For command time
+      PromptSebPromptSebCmdTimeProcess="yes"
+      PromptSebCmdLaunched="yes"
+
+      if [[ "$TTY" != "" ]] {
+          PromptSebTimeRemindMs=`date +%N`
+          PromptSebTimeRemindSec=$SECONDS
+      }
+   }
+#------------------------------------------------------------------------------
+}
+
+#------------------------------------------------------------------------------
+# Prompt utils functions
+#------------------------------------------------------------------------------
+seb_title() {
+   print -Pn "\e]2; $* \a" # plain xterm seb_title
+}
+
+#------------------------------------------------------------------------------
+# Prompt
+#------------------------------------------------------------------------------
+seb_setup_prompt () {
+
+   local promptsize=${#${(%):----}}
+   local ptssize=${#${(%):--(%l:%L:%j)-}}
+   local pwdsize=${#${(%):--(%d)-}}
+   local loginsize=${#${(%):--(%n)-}}
+   local hostsize=${#${(%):--(%m)-}}
+   local termwidth=${COLUMNS}
+   local fillsize
+   local cursize
+
+   PR_FILLBAR=""
+   PR_PWDLEN=""
+
+   PR_OPEN="$PR_HB("
+   PR_CLOSE="$PR_LINE_COLOR)$PR_HB"
+   PR_PTS=""
+   PR_PWD=""
+   PR_LOGIN=""
+   PR_HOST=""
+   PR_HISTERR="$PR_OPEN$PR_HISTORY_COLOR%h%(?..$PR_ERROR_COLOR %?)$PR_CLOSE"
+   PR_PS2="$PR_OPEN$PR_PS2_COLOR%_$PR_CLOSE"
+   PR_CT="$PR_OPEN$PR_CT_COLOR$PromptSebCmdTime$PromptSebTimeUnity$PR_CLOSE"
+   PR_TIME="$PR_OPEN$PR_TIME_COLOR%D{%H:%M:%S}$PR_CLOSE"
+
+   (( cursize = $promptsize ))
+
+   if [[ "$cursize + $ptssize" -le $termwidth ]] {
+      PR_PTS="$PR_OPEN$PR_PTS_COLOR%l:%L:%j$PR_CLOSE"
+      (( cursize  = $cursize + $ptssize ))
+
+      if [[ "$cursize + $pwdsize" -le $termwidth ]] {
+         PR_PWD="$PR_OPEN$PR_PWD_COLOR%d$PR_CLOSE"
+         (( cursize  = $cursize + $pwdsize ))
+
+         if [[ "$cursize + $loginsize" -le $termwidth ]] {
+            PR_LOGIN="$PR_OPEN$PR_LOGIN_COLOR%n$PR_CLOSE"
+            (( cursize  = $cursize + $loginsize ))
+
+            if [[ "$cursize + $hostsize" -le $termwidth ]] {
+               PR_HOST="$PR_OPEN$PR_HOST_COLOR%m$PR_CLOSE"
+               (( cursize  = $cursize + $hostsize ))
+            }
+         }
+      } else {
+         if [[ "$termwidth - $cursize" -gt 6 ]] {
+            (( PR_PWDLEN = $termwidth - $cursize - 4))
+            (( cursize = $termwidth ))
+            PR_PWD="$PR_OPEN$PR_PWD_COLOR%$PR_PWDLEN<...<%d%<<$PR_CLOSE"
+         }
+      }
+   }
+
+   (( fillsize = $termwidth - $cursize ))
+   PR_FILLBAR="\${(l.$fillsize..${PR_HB_FILL}.)}"
+
+   seb_title %d
+}
+
+prompt_seb_setup

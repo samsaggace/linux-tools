@@ -1,0 +1,21 @@
+#!/bin/bash 
+
+title1=$(echo $1 | sed 's/ /\\\ /g')
+title2=$(echo $5 | sed 's/ /\\\ /g' | sed 's/.*\((.*)\)/\1/g')
+
+file1=$2
+file2=$5
+#
+#res=$(echo $3 | grep "(working copy)$")
+#if [ $? = 0 ]; then
+#   file1=$(echo $3 | awk -F "(working copy)" '{print $1}')
+#fi
+#
+#res=$(echo $5 | grep "(working copy)$")
+#if [ $? = 0 ]; then
+#   file2=$(echo $5 | sed 's@\(.*\)[[:space:]]\+(working copy)$@\1@')
+#fi
+
+gvim --nofork -d -geometry 234x58 "$file1" "$file2" +":set titlestring=git\\ diff\\ :\\ $title2"
+
+

@@ -1,0 +1,11 @@
+#!/bin/bash --norc
+####################
+
+$PYBUGZ_PATH/bin/bugz "$@"
+Ret=$?
+
+if [ "$PYBUGZ_PATH" != "" ]; then
+   rm -f $PYBUGZ_PATH/bugz/*.pyc
+fi
+
+exit $Ret

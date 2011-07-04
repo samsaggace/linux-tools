@@ -1,0 +1,27 @@
+#------------------------------------------------------------------------------
+# PROMPT CUSTOM 
+#------------------------------------------------------------------------------
+
+User= 
+Host="\[\e[0;1;34m\]$HOSTNAME\[\e[0m\]"
+Separator=
+CurPwd="\[\e[0;1;36m\]\w\[\e[0m\]"
+ExtraInfos="(\[\e[0;1;33m\]\!\[\e[0m\])(\t) "
+
+Prompt="\r\n\[\e[0;1;33m\]>> \[\e[0m\]"
+
+if [ "$USER" != "$MATRICULE" ]; then
+   User="\[\[\e[0;1;31m\]NOT_ME\[\e[0m\]"
+   Host=
+fi
+
+if [ "$HOSTNAME" != "$MY_HOST" ]; then
+   Host="\[\e[0;1;31m\]$HOSTNAME\[\e[0m\]"
+fi
+
+if [ "$USER" != "$MATRICULE" -a "$HOSTNAME" != "$MY_HOST" ]; then
+   Separator="::"
+fi
+
+PS1="\[\e[0m\][$User$Separator$Host]$ExtraInfos$CurPwd$Prompt"
+

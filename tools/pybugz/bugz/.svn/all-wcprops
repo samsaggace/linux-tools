@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/sagem-tools-modrivers/!svn/ver/432/BO/branches/BO_sagem-tools-modrivers_beta/pybugz/bugz
+END
+bugzilla.py
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/sagem-tools-modrivers/!svn/ver/251/BO/branches/BO_sagem-tools-modrivers_beta/pybugz/bugz/bugzilla.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/sagem-tools-modrivers/!svn/ver/234/BO/branches/BO_sagem-tools-modrivers_beta/pybugz/bugz/__init__.py
+END
+config.py
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/sagem-tools-modrivers/!svn/ver/317/BO/branches/BO_sagem-tools-modrivers_beta/pybugz/bugz/config.py
+END
+cli.py
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/sagem-tools-modrivers/!svn/ver/432/BO/branches/BO_sagem-tools-modrivers_beta/pybugz/bugz/cli.py
+END

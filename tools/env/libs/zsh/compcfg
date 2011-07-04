@@ -1,0 +1,24 @@
+fpath=($TOOLS_PATH/env/libs/zsh/completion $TOOLS_PATH/env/libs/zsh/prompts $fpath)
+
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' menu yes select
+zstyle ':completion:*' force-list always
+zstyle ':completion:*' menu select=1
+
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+zstyle '*:processes-names' command 'ps -e -o comm='
+zstyle '*:processes' command 'ps -au$USER'
+
+zstyle :compinstall filename '/home/${MATRICULE}/.zshrc'
+
+autoload -Uz compinit
+compinit
+
+autoload -U promptinit 
+promptinit
+prompt modrivers
+
+autoload zsh/complist
+
