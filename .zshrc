@@ -1,176 +1,162 @@
-echo "   _________  _   _ ____   ____ "
-echo "  |__  / ___|| | | |  _ \ / ___|"
-echo "    / /\___ \| |_| | |_) | |    "
-echo " _ / /_ ___) |  _  |  _ <| |___ "
-echo "(_)____|____/|_| |_|_| \_\\\\\____|"
-echo ""
+
+autoload -U colors && colors
+fpath=(~/Tools/tools/env/libs/zsh/prompts $fpath)
+
+# Lines configured by zsh-newuser-install
+HISTFILE=~/.histfile
+HISTSIZE=2000
+SAVEHIST=2000
+
+alias e='export'
+alias a='alias'
+alias u='unset'
+alias so='setopt'
+alias uo='unsetopt'
+
+
+bindkey -e
+# End of lines configured by zsh-newuser-install
+# The following lines were added by compinstall
+zstyle :compinstall filename "$HOME/.zshrc"
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+
+# VCS info :
+autoload -Uz vcs_info
+# check-for-changes can be really slow.
+# you should disable it, if you work with large repositories   
+zstyle ':vcs_info:*' enable git cvs svn 
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:*' unstagedstr '%F{red}●' 
+zstyle ':vcs_info:*' stagedstr '%F{green}●'   
+zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat '%b%F{1}:%F{11}%r'
+
+
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' menu yes select
+zstyle ':completion:*' force-list always
+zstyle ':completion:*' menu select=1
+
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+zstyle '*:processes-names' command 'ps -e -o comm='
+zstyle '*:processes' command 'ps -au$USER'
+
+setopt append_history
+setopt autocd
+setopt auto_menu
+setopt auto_param_slash
+setopt auto_remove_slash
+setopt auto_pushd
+unsetopt beep
+setopt chase_links
+setopt complete_in_word
+setopt correct
+setopt csh_junkie_history
+setopt extended_glob
+setopt extended_history
+unsetopt hist_beep
+setopt hist_find_no_dups
+setopt hist_ignore_all_dups
+setopt hist_verify
+unsetopt list_beep
+setopt list_rows_first
+setopt inc_append_history
+setopt pushd_ignore_dups
+setopt pushd_to_home
+unsetopt function_argzero
+
+autoload -U bashcompinit
+bashcompinit
+
+#bash_source() {
+#  alias shopt=':'
+#  alias _expand=_bash_expand
+#  alias _complete=_bash_comp
+#  emulate -L sh
+#  setopt kshglob noshglob braceexpand
+#
+#  have() {
+#    unset have
+#    (( ${+commands[$1]} )) && have=yes
+#  }
+#
+#  source "$@"
+#}
+#
+#bash_source /etc/bash_completion.d/openssl
 
 #------------------------------------------------------------------------------
 # Compinstall configuration
 #------------------------------------------------------------------------------
-zstyle ':completion:*' completer _expand _complete _approximate
+zstyle ':completion:*' completer _expand _complete
 zstyle ':completion:*' completions 1
 zstyle ':completion:*' glob 1
 zstyle ':completion:*' insert-unambiguous true
-zstyle ':completion:*' list-colors ''
-#zstyle ':completion:*' matcher-list 'r:|[._-]=** r:|=**' 'l:|=* r:|=*'
 zstyle ':completion:*' max-errors 1 not-numeric
 zstyle ':completion:*' original true
 zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*' substitute 1
 zstyle ':completion:*' verbose true
-zstyle ':completion:*' menu select=2
-zstyle ':completion:*' force-list always
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path ~/.zsh/cache
+#zstyle ':completion:*' menu select=2
 zstyle ':completion:*:*:kill:*' menu yes select
 zstyle ':completion:*:kill:*'   force-list always
 
-zstyle :compinstall filename '/home/g133090/.zshrc'
 
-autoload -Uz compinit
-compinit
+autoload -U promptinit 
+promptinit
+prompt seb
 
-#autoload zsh/complist
+alias vi='gvim -g'
+alias vir='vi --remote-silent'
+alias vid='gvim -g -d'
 
-HISTFILE=~/.histfile
-HISTSIZE=2000
-SAVEHIST=2000
-bindkey -e
-
-
-#------------------------------------------------------------------------------
-# Options
-#------------------------------------------------------------------------------
-setopt appendhistory autocd extendedglob nomatch notify
-
-# Input/Output Options
-setopt correct short_loops
-
-#Expansion and Globbing
-setopt bad_pattern extendedglob case_glob nullglob
-
-#Options controlling the history
-setopt bang_hist append_history extended_history hist_ignore_space hist_verify
-
-#Completion Options
-setopt list_ambiguous #glob_complete rec_exact
-
-#cd Options
-setopt autocd auto_pushd pushd_to_home
-
-#Job Control Options
-setopt notify check_jobs
-
-#ooooo
-setopt complete_in_word extended_history multios
-
-
-#------------------------------------------------------------------------------
-# Custom environment variables
-#------------------------------------------------------------------------------
-alias e='export'
-alias a='alias'
-alias u='unset'
-
-e  TMPDIR="${HOME}/tmp"
-e  SVN_EDITOR='gvim -geometry 88x68'
-
+bindkey "\e[3~" delete-char
+bindkey "\e[H" beginning-of-line
+bindkey "\e[F" end-of-line
+export CCACHE_DIR="/usr/local$HOME/.ccache"
 #------------------------------------------------------------------------------
 # Custom aliases
 #------------------------------------------------------------------------------
 
-a  vi='gvim -geometry 88x68 -O'
 
-a ll="ls -o -h -N --color=auto"
-a lla="ls -o -h -A --color=auto"
+alias ll="ls -o -h -N --color=auto"
+alias la="ls -o -h -A --color=auto"
+alias md="mkdir -p"
 
-a gp="grep --exclude-dir='.svn' --color=always -n -r"
-a gpi="gp -i"
+alias gp="grep --exclude-dir='.svn' --color=always -n -r"
+alias gpi="gp -i"
+alias cm="~/Tools/cmake"
+
+
+#Set DIR
+alias d='export DIR=$(pwd)'
 
 #Pipe vi:
-a -g V='|vi -R -'
+alias -g V='|vi -R -'
+alias -g H='HEAD'
+alias -g H='HEAD'
+alias -g ...='../..'
+
+export PATH="$PATH:$HOME/Tools/"
+export MANPAGER='manpagervim.sh'
+export JS_CMD='jsc'
 
 
-# Directory comparaison with vim
-vid () {
-   
-   # Check if args are url
-   res1=`echo $1 | grep "^[[:alpha:]]\+://"`
-   res2=`echo $2 | grep "^[[:alpha:]]\+://"`
-
-   if [ "$res1" != "" ]; then
-      # Export dir to tmp dir
-      dir1="$TMPDIR/$RANDOM"
-      echo "Exporting $1 to $dir1 to be compared..."
-      svn export $1 $dir1 > /dev/null;
-      if [ $? != 0 ]; then
-         echo "Error : Could not export $1 !!"
-         exit 1;
-      fi
-      dirnamea='+let g:DirDiffNameA = "'$1'"'
-   else
-      dir1=$1
-      dirnamea=
-   fi
-
-   if [ "$res2" != "" ]; then
-      # Export dir to tmp dir
-      dir2="$TMPDIR/$RANDOM"
-      echo "Exporting $2 to $dir2 to be compared..."
-      svn export $2 $dir2 > /dev/null;
-      if [ $? != 0 ]; then
-         echo "Error : Could not export $1 !!"
-         exit 1;
-      fi
-      dirnameb='+let g:DirDiffNameB = "'$2'"'
-   else
-      dir2=$2
-      dirnameb=
-   fi
-
-   gvim -geometry 176x68+0+0 +'let g:DirDiffExcludes = ".svn, .*.swp"' \
-                             $dirnamea                         \
-                             $dirnameb                         \
-                             +'DirDiff '$dir1' '$dir2''
-}
-
-#Open a greped file with vi at the right line :
-vig () {
-   vi_file=`echo "$1" | awk -F : '{print $1}'`;
-   vi_line=`echo "$1" | awk -F : '{print $2}'`;
-   vi $vi_file +$vi_line;
-}
-
-vgp () {
-   if [ $# = "0" ]; then
-      echo "Error : Need to specify a Pattern"
-      echo "Usage : vgp Pattern [directory]"
-      return;
-   fi
-   if [ $# -gt 2 ]; then
-      echo "Error : To many directories, only none or one supported"
-      echo "Usage : vgp Pattern [directory]"
-      return;
-   fi
-   if [ "$2" = "" ]; then
-      arg2="**/*[^ao]"
-   else
-      arg2="$2/**/*[^ao]"
-   fi
-   vi -geometry 176x68 +'GREP /'"$1"'/j '"$arg2"''
-}
 #------------------------------------------------------------------------------
 # Custom suffixes aliases
 #------------------------------------------------------------------------------
-a -s pdf="kpdf "
-a -s c="vi "
-a -s cpp="vi "
-a -s h="vi "
-a -s txt="vi "
-a -s log="vi "
-a -s htm="opera "
-a -s html="opera "
+alias -s pdf="evince "
+alias -s c="vi "
+alias -s cpp="vi "
+alias -s h="vi "
+alias -s txt="vi "
+alias -s log="vi "
+alias -s htm="google-chrome "
+alias -s html="google-chrome "
 
 #------------------------------------------------------------------------------
 # HOOKS
@@ -178,150 +164,22 @@ a -s html="opera "
 CmdTimeProcess="no"
 CmdLaunched="yes"
 
-
 #------------------------------------------------------------------------------
-precmd () {
-#------------------------------------------------------------------------------
-#echo "precmd"
-   
-   title %d
-
-   # For command time
-   local promptsize=${#${--(%l:%L:%j)--(%d)---(%n)--(%m)--}}
-   local pwdsize=${#${(%):-%d}}
-   local termwidth
-
-   (( termwidth = ${COLUMNS} - 33 ))
-   PR_FILLBAR=""
-   PR_PWDLEN=""
-    
-   if [[ "$promptsize + $pwdsize" -gt $termwidth ]]; then
-      ((PR_PWDLEN=$termwidth - $promptsize))
-   else
-       PR_FILLBAR="\${(l.(($termwidth - ($promptsize + $pwdsize)))..${PR_HB}.)}"
-   fi
-
-   # For command time
-   CmdTime=0
-
-   if [ "$CmdTimeProcess" = "yes" ] && [ "$CmdLaunched" = "yes" ]; then
-      CmdLaunched="no"
-      CmdTime=$(($SECONDS-$TimeRemind))
-   fi
+#Open a greped file with vi at the right line :
+vig () {
+   vi_file=`echo "$1" | awk -F : '{print $1}'`;
+   vi_line=`echo "$1" | awk -F : '{print $2}'`;
+   vi $vi_file +$vi_line;
 }
 
-
-#------------------------------------------------------------------------------
-preexec()
-#------------------------------------------------------------------------------
-{
-#echo "preexec"
-   title %d
-
-   if [ "x$TTY" != "x" ]; then
-      # For command time
-      CmdTimeProcess="yes"
-      TimeRemind="$SECONDS"
-      CmdLaunched="yes"
-   fi
+vic () {
+   vi_file=`echo "$1" | awk -F : '{print $1}'`;
+   vi_line=`echo "$1" | awk -F : '{print $2}'`;
+   vi -t $vi_file +$vi_line;
 }
 
-
-#------------------------------------------------------------------------------
-postcmd () {
-#------------------------------------------------------------------------------
-#echo "postcmd"
+p () {
+    pri="$(( $@ ))"
+   echo "$pri";
 }
-
-
-#------------------------------------------------------------------------------
-# Utils functions
-#------------------------------------------------------------------------------
-
-title() {
-   print -Pn "\e]2; $* \a" # plain xterm title
-}
-
-
-#------------------------------------------------------------------------------
-# Prompt
-#------------------------------------------------------------------------------
-
-myprompt () {
-   setopt prompt_subst
-   autoload colors zsh/terminfo
-
-   if [[ "$terminfo[colors]" -ge 8 ]]; then
-       colors
-   fi
-
-   PR_NO_COLOR="%{$terminfo[sgr0]%}"
-   for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE BLACK; do
-       eval PR_$color='$PR_NO_COLOR%{$terminfo[bold]$fg[${(L)color}]%}'
-       eval PR_L$color='$PR_NO_COLOR%{$fg[${(L)color}]%}'
-       (( count = $count + 1 ))
-   done
-
-   typeset -A altchar
-   set -A altchar ${(s..)terminfo[acsc]}
-   PR_SET_CHARSET="%{$terminfo[enacs]%}"
-   PR_IN="%{$terminfo[smacs]%}"
-   PR_OUT="%{$terminfo[rmacs]%}"
-   PR_HB=${altchar[q]:--}
-   PR_UL=${altchar[l]:--}
-   PR_LL=${altchar[m]:--}
-   PR_LR=${altchar[j]:--}
-   PR_UR=${altchar[k]:--}
-
-   PR_LINE_COLOR=$PR_BLUE
-   PR_TL_COLOR=$PR_BLUE
-   PR_UL_COLOR=$PR_CYAN
-   PR_UR_COLOR=$PR_GREEN
-   PR_MR_COLOR=$PR_MAGENTA
-   PR_LL_COLOR=$PR_YELLOW
-   PR_LR_COLOR=$PR_WHITE
-   PR_TR_COLOR=$PR_WHITE
-   PR_CT_COLOR=$PR_YELLOW
-
-
-if [ "$HOST" != "$MYHOST" ]; then
-   PR_UL_COLOR=$PR_YELLOW
-   PR_MR_COLOR=$PR_MAGENTA
-fi
-if [ "$USER" != "$MATRICULE" ]; then
-   PR_UL_COLOR=$PR_RED
-   PR_UR_COLOR=$PR_RED
-fi
-if [ "$SHLVL" != "3"  ]; then
-   PR_TL_COLOR=$PR_RED
-fi
-
-
-
-   PROMPT='$PR_SET_CHARSET\
-$PR_LINE_COLOR$PR_IN$PR_UL$PR_HB$PR_OUT(\
-$PR_TL_COLOR%l:%L:%j\
-$PR_LINE_COLOR)$PR_IN$PR_HB$PR_HB$PR_OUT(\
-$PR_UL_COLOR%d\
-$PR_LINE_COLOR)$PR_IN$PR_HB${(e)PR_FILLBAR}$PR_HB$PR_OUT(\
-$PR_UR_COLOR%$PR_PWDLEN<...<%n$PR_LINE_COLOR)$PR_IN$PR_HB$PR_HB($PR_MR_COLOR%m%<<$PR_OUT\
-$PR_LINE_COLOR)$PR_IN$PR_HB$PR_UR$PR_OUT\
-
-$PR_IN$PR_LL$PR_HB$PR_OUT($PR_LL_COLOR%h%(?..$PR_LINE_COLOR:$PR_RED%?)$PR_LINE_COLOR)\
-$PR_LINE_COLOR$PR_IN$PR_HB>$PR_OUT$PR_NO_COLOR '
-
-   RPROMPT=' $PR_LINE_COLOR<>$PR_IN$PR_HB$PR_OUT(\
-$PR_CT_COLOR$CmdTime sec\
-$PR_LINE_COLOR)$PR_IN$PR_HB$PR_OUT(\
-$PR_TR_COLOR%D{%H:%M:%S}\
-$PR_LINE_COLOR)$PR_IN$PR_HB$PR_HB$PR_OUT(\
-$PR_LR_COLOR%D{%a,%d%b20%y}\
-$PR_LINE_COLOR)$PR_IN$PR_HB$PR_LR$PR_OUT$PR_NO_COLOR'
-
-   PS2='$PR_LINE_COLOR$PR_IN$PR_HB$PR_HB$PR_OUT(\
-$PR_LL_COLOR%_\
-$PR_LINE_COLOR)$PR_IN$PR_HB$PR_HB$PR_OUT$PR_NO_COLOR '
-}
-
-myprompt
 
