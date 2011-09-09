@@ -11,12 +11,15 @@ fi
 master=$1
 br_list=`git br`
 current=`echo "$br_list" | grep "^\*" | awk '{print $2}'`
-up_list=`echo "$br_list" | sed "s/[ *]//g" | grep -v "$master"`
+up_list=`echo "$br_list" | sed "s/[ *]//g" | grep -v "$master" | grep -v "\-[0-9]\{10\}"`
+now=`date +%y%m%d%H%M`
 
 echo -e "Branches to update :\n$up_list\n"
 git co $master
 git svn rebase
 for branch in $up_list; do
+    echo -e "\nSaving branch in '$branch-$now'"
+    git branch $branch-$now $branch
     echo -e "\nRebasing '$branch'"
     git rebase $master $branch
 done
