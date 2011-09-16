@@ -18,6 +18,11 @@ echo -e "Branches to update :\n$up_list\n"
 git co $master
 git svn rebase
 for branch in $up_list; do
+    if [[ `git rev-list $master -n1` == `git merge-base $branch $master` ]]; then
+        echo -e "\nBranch '$branch' up-to-date";
+        continue;
+    fi;
+
     echo -e "\nSaving branch in '$branch-$now'"
     git branch $branch-$now $branch
     echo -e "\nRebasing '$branch'"
