@@ -1,5 +1,7 @@
 #!/bin/sh --norc
 
+mkdir nsv
+cd nsv
 git init
 git remote add origin git://sch1/nsv
 git config --replace-all remote.origin.fetch '+refs/remotes/*:refs/remotes/*'
