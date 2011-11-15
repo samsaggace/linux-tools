@@ -194,3 +194,13 @@ p () {
    echo "$pri";
 }
 
+mytop () {
+    clear;
+    while (true); do
+        echo -e "\x1b[f";
+        $*;
+        sleep 1;
+    done;
+}
+
+alias ccs='mytop ccache -s'
