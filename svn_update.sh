@@ -8,6 +8,12 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
+if [[ `git status -s` != '' ]]; then
+    echo -e "Stashing local diff to enable rebase (Warning : Manual stash pop needed if script interrupted)"
+    stashed=1
+    git stash
+fi;
+
 master=$1
 br_list=`git br`
 current=`echo "$br_list" | grep "^\*" | awk '{print $2}'`
@@ -31,3 +37,7 @@ done
 echo -e "\n"
 git co $current
 
+if [ "$stashed" = "1" ]; then
+    echo -e "Restoring stashed data"
+    git stash pop
+fi
