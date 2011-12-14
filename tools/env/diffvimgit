@@ -16,6 +16,6 @@ file2=$5
 #   file2=$(echo $5 | sed 's@\(.*\)[[:space:]]\+(working copy)$@\1@')
 #fi
 
-gvim --nofork -d -geometry 234x58 "$file1" "$file2" +":set titlestring=git\\ diff\\ :\\ $title2"
+gvim --nofork -d -geometry 500x90 "$file1" "$file2" +":set titlestring=git\\ diff\\ :\\ $title2"
 
 
