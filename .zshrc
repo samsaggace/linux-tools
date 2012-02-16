@@ -80,6 +80,8 @@ setopt pushd_ignore_dups
 setopt pushd_to_home
 unsetopt function_argzero
 
+autoload -U zmv
+
 autoload -U bashcompinit
 bashcompinit
 
@@ -121,9 +123,10 @@ autoload -U promptinit
 promptinit
 prompt seb
 
-alias vi='gvim -g'
+alias vi='gvim -geometry=133x150'
 alias vir='vi --remote-silent'
-alias vid='gvim -g -d'
+alias vid='gvim -d'
+alias gti='git'
 
 bindkey "\e[3~" delete-char
 bindkey "\e[H" beginning-of-line
@@ -195,8 +198,8 @@ p () {
 }
 
 mytop () {
-    clear;
     while (true); do
+        clear;
         echo -e "\x1b[f";
         $*;
         sleep 1;

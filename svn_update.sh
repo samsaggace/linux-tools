@@ -22,6 +22,7 @@ now=`date +%y%m%d%H%M`
 
 echo -e "Branches to update :\n$up_list\n"
 git co $master
+git svn fetch
 git svn rebase
 for branch in $up_list; do
     if [[ `git rev-list $master -n1` == `git merge-base $branch $master` ]]; then

@@ -113,9 +113,9 @@ $PR_LL$PR_HISTERR$PR_HB$PR_NO_COLOR '
       seb_setup_prompt
 
     if [[ -z $(git ls-files --other --exclude-standard 2> /dev/null) ]] {
-        zstyle ':vcs_info:*' formats '%F{cyan}[%b(%5.5i)%c%u%B%F{cyan}]%m%f'
+        zstyle ':vcs_info:*' formats '%F{cyan}[%b(%6.6i)%c%u%B%F{cyan}]%m%f'
     } else {
-        zstyle ':vcs_info:*' formats '%F{yellow}[%b(%5.5i)%c%u%B%F{yellow}●%F{yellow}]%m%f'
+        zstyle ':vcs_info:*' formats '%F{yellow}[%b(%6.6i)%c%u%B%F{yellow}●%F{yellow}]%m%f'
     }
 
       vcs_info
