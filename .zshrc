@@ -27,11 +27,12 @@ compinit
 autoload -Uz vcs_info
 # check-for-changes can be really slow.
 # you should disable it, if you work with large repositories   
-zstyle ':vcs_info:*' enable git cvs svn 
+zstyle ':vcs_info:*' enable git cvs svn hg
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:*' unstagedstr '%F{red}●' 
 zstyle ':vcs_info:*' stagedstr '%F{green}●'   
 zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat '%b%F{1}:%F{11}%r'
+zstyle ':vcs_info:hg:*' branchformat '%b'
 zstyle ':vcs_info:*' get-revision true
 zstyle ':vcs_info:git*+set-message:*' hooks git-stash
 
