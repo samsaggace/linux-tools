@@ -11,4 +11,5 @@ git config --remove-section remote.origin
 git checkout -b master remotes/nsv-tangox
 
 git svn init -s svn+ssh://svn/repos/nsv
+git svn fetch
 git svn rebase
