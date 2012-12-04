@@ -23,18 +23,22 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
-# VCS info :
-autoload -Uz vcs_info
-# check-for-changes can be really slow.
-# you should disable it, if you work with large repositories   
-zstyle ':vcs_info:*' enable git cvs svn hg
-zstyle ':vcs_info:*' check-for-changes true
-zstyle ':vcs_info:*' unstagedstr '%F{red}●' 
-zstyle ':vcs_info:*' stagedstr '%F{green}●'   
-zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat '%b%F{1}:%F{11}%r'
-zstyle ':vcs_info:hg:*' branchformat '%b'
-zstyle ':vcs_info:*' get-revision true
-zstyle ':vcs_info:git*+set-message:*' hooks git-stash
+autoload -U is-at-least
+
+if is-at-least 4.3.8; then
+    # VCS info :
+    autoload -Uz vcs_info
+    # check-for-changes can be really slow.
+    # you should disable it, if you work with large repositories
+    zstyle ':vcs_info:*' enable git cvs svn hg
+    zstyle ':vcs_info:*' check-for-changes true
+    zstyle ':vcs_info:*' unstagedstr '%F{red}●'
+    zstyle ':vcs_info:*' stagedstr '%F{green}●'
+    zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat '%b%F{1}:%F{11}%r'
+    zstyle ':vcs_info:hg:*' branchformat '%b'
+    zstyle ':vcs_info:*' get-revision true
+    zstyle ':vcs_info:git*+set-message:*' hooks git-stash
+fi
 
 # Show count of stashed changes
 function +vi-git-stash() {
@@ -128,12 +132,11 @@ alias vi='gvim -geometry=133x150'
 alias vir='vi --remote-silent'
 alias vid='gvim -d'
 alias gti='git'
+alias ggb='git gui blame'
 
 bindkey "\e[3~" delete-char
 bindkey "\e[H" beginning-of-line
 bindkey "\e[F" end-of-line
-export CCACHE_DIR="/usr/local$HOME/.ccache"
-export LHOME="/usr/local$HOME/lhome"
 #------------------------------------------------------------------------------
 # Custom aliases
 #------------------------------------------------------------------------------
@@ -142,14 +145,11 @@ export LHOME="/usr/local$HOME/lhome"
 alias ll="ls -o -h -N --color=auto"
 alias la="ls -o -h -A --color=auto"
 alias md="mkdir -p"
+alias df="df -h"
 
-alias gp="grep --exclude-dir='.svn' --color=always -n -r"
+alias gp="grep --exclude-dir='.svn' --exclude-dir='.git' --exclude='cscope.*' --color=always -n -r"
 alias gpi="gp -i"
 alias cm="~/Tools/cmake"
-
-
-#Set DIR
-alias d='export DIR=$(pwd)'
 
 #Pipe vi:
 alias -g V='|vi -R -'
@@ -182,6 +182,14 @@ CmdLaunched="yes"
 
 #------------------------------------------------------------------------------
 #Open a greped file with vi at the right line :
+
+compdefas () {
+  local a
+  a="$1"
+  shift
+  compdef "$_comps[$a]" "${(@)*}=$a"
+}
+
 vig () {
    vi_file=`echo "$1" | awk -F : '{print $1}'`;
    vi_line=`echo "$1" | awk -F : '{print $2}'`;
@@ -193,6 +201,11 @@ vic () {
    vi_line=`echo "$1" | awk -F : '{print $2}'`;
    vi -t $vi_file +$vi_line;
 }
+
+viw () {
+    vi $(which $*)
+}
+compdefas which viw
 
 p () {
     pri="$(( $@ ))"
@@ -207,5 +220,7 @@ mytop () {
         sleep 1;
     done;
 }
+compdef _command mytop
+
 
 alias ccs='mytop ccache -s'
