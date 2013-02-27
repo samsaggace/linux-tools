@@ -9,6 +9,7 @@ if [[ `git status -s -uno` != '' ]]; then
     git stash
 fi;
 
+root_dir="/home/sch/Patches/git_backup"
 br_list=`git br`
 current=`echo "$br_list" | grep "^\*" | awk '{print $2}'`
 up_list=`echo "$br_list" | sed "s/[ *]//g" | grep -v "\-[0-9]\{10\}" | grep -v "^__"`
@@ -22,6 +23,7 @@ for branch in $up_list; do
     echo -e "\nRebasing '$branch' on svn"
     git co $branch
     git svn rebase -l
+    git-patch-svn.sh $root_dir/$now/$branch
 done
 echo -e "\n"
 git co $current

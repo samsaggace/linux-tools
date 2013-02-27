@@ -1,0 +1,239 @@
+#!/bin/bash
+#
+# Cédric Le Dillau
+
+# catch error
+set -e
+
+debug=0
+verbose=0
+
+device=''
+user=''
+input_type=''
+input_read=''
+
+if [ -f ~/.powerswitchrc ]; then
+    . ~/.powerswitchrc
+fi
+port=${defaultport}
+
+
+function error() {
+    printf "${Red}%s${NC}\n" "$*"
+}
+
+function debug() {
+    if [[ "${debug}" > 0 ]]; then
+        printf "${Green}%s${NC}\n" "$*"
+    fi
+}
+
+function verbose() {
+    if [[ "${verbose}" > 0 ]]; then
+        printf "%s\n" "$*"
+    fi
+}
+
+# setup_device
+function setup_device() {
+    local ldevice=$1
+    debug "Device: ${device}"
+
+    stty sane ispeed 9600 -F ${device} raw
+}
+
+# read_from_device <device> <msg>
+function write_to_device() {
+    local ldevice=$1
+    local msg=$2
+
+    printf "%s" $msg > ${ldevice}
+}
+# read_from_device <device> <query>
+function read_from_device() {
+    local ldevice=$1
+    local query=$2
+
+    printf "%s" ${query} > ${ldevice} ; read -n6 response < ${ldevice}; echo $response
+}
+
+## Ensure port belongs to user
+#
+# "user_output_port_check $port $user"
+function user_output_port_check() {
+    local port=$1
+    local user=$2
+
+    if [ ${user} != ${USER} ]; then
+        debug "Asking user '${user}' differ from effective user."
+    fi
+    echo ${ports} | grep -q "${port}:${user}" && return 0
+
+    error "No user-port found for output!"
+    return 1
+}
+
+## Ensure input port belongs to user
+#
+# "user_input_port_check $port $user"
+function user_input_port_check() {
+    local port=$1
+    local user=$2
+
+    if [ ${user} != ${USER} ]; then
+        debug "Ask user '${user}' differ from effective user."
+    fi
+    echo ${inputs} | grep -q "${port}:${user}" && return 0
+
+    error "No user-port found for input!"
+    return 0
+}
+
+function mdelay() {
+    local ms=$(($1 * 1))
+
+    start=$(date -u "+%s%N" | sed -e 's/\([0-9]\+\)......$/\1/')
+    end=$(( ${start} + ${ms} ))
+
+    now=$(date -u "+%s%N" | sed -e 's/\([0-9]\+\)......$/\1/')
+
+    # deactivate command tracing
+    if [[ "${debug}" > 0 ]]; then
+        set +x
+    fi
+    while [[ $now < $end ]]; do
+       now=$(date -u "+%s%N" | sed -e 's/\([0-9]\+\)......$/\1/')
+    done
+
+    # reactivate command tracing if debugging
+    if [[ "${debug}" > 0 ]]; then
+        set -x
+    fi
+}
+
+function get_relay_states() {
+    local response
+
+    echo "?" > ${device} ; read -n6 response < ${device}; echo $response | \
+        sed -ne 's/S>\([01]\+\)/\1/ p' && return 0 || return 1
+}
+
+function get_input_state() {
+    local response
+    local port
+    local ldevice
+    if [ -n "$2" ]; then
+        ldevice="$2"
+    else
+        ldevice=${device}
+    fi
+    port=$(( $1 + 0 ))
+    echo "E${port}" > ${ldevice} ; read -n7 response < ${ldevice}; echo $response | \
+        sed -ne "s/E${port}>\([09]\+\)/\1/ p"
+}
+
+# "set_input_mode 1 A"
+function set_input_mode() {
+    local port=$1
+    local mode=$2
+
+    echo "IN${port}${mode}" > ${device}
+}
+
+function usage() {
+cat <<_EOF
+$(basename $0) -- Power switch (UX-440) control.
+
+Syntax: $(basename $0) [OPTION] [CONFIG] [COMMAND]
+
+Config:
+    -F <device>         Device file (i.e "/dev/ttyUSB0")
+    -p <port>           Port to be controlled (1 to n)
+    -u <user>           User port restriction check
+Options:
+    -d                  Debug
+    -h                  This help
+    -v                  Verbose
+Command:
+    -s <on|off>         Set relay state (NO logic)
+    -i <d|a>            Read Digital or Analog input
+    -r                  off+on cycle
+
+_EOF
+printf "Your USB serial devices are:\n"
+printf "   %s\n" $(ls -1d /sys/class/tty/ttyUSB* 2>/dev/null | sed 's,/sys/class/tty/,/dev/,g')
+}
+
+dev=1
+on=0
+
+# Parse our arguments
+while getopts "dhvu:p:s:i:rF:" flag; do
+  case $flag in
+# options
+    d) debug=1; set -x ;;
+    h) usage; exit 0 ;;
+    v) verbose=$(($verbose + 1)) ;;
+# configurations
+    u) user=${OPTARG} ;;
+    p) port=${OPTARG} ;;
+    F) device=${OPTARG} ;;
+# commands
+    s) state=${OPTARG} ;;
+    r) do_reset=1 ;;
+    i) input_read=1; input_type=${OPTARG} ;;
+# others
+    *) printf "${Red}Unrecognized $flag${NC}\n"
+  esac
+done
+
+while [[ $OPTIND > 1 ]]; do
+    shift
+    OPTIND=$(($OPTIND - 1))
+done
+
+# Parameter check:
+if [ ! -e "${device}" ]; then
+    error "Device file '${device}' doesn't exists."
+    exit 2
+fi
+
+
+setup_device ${device}
+
+#
+# O U T P U T
+#
+
+if user_output_port_check $port $user; then
+    if [[ $state =~ ^[Oo][Nn] ]]; then
+        verbose "Switch ON port ${port}"
+        echo "S${port}0" > ${device}
+    fi
+    if [[ $state =~ ^[Oo][Ff]{2} ]]; then
+        verbose "Switch OFF port ${port}"
+        echo "S${port}1" > ${device}
+        mdelay 300
+    fi
+    if [[ $do_reset = 1 ]]; then
+        verbose "Power-cycle port ${port}"
+        echo "S${port}1" > ${device}
+        mdelay 1000
+        echo "S${port}0" > ${device}
+    fi
+fi
+
+#
+# I N P U T
+#
+if user_input_port_check $port $user; then
+    if [[ ${input_read} = 1 ]]; then
+        echo $(get_input_state $port)
+    fi
+fi
+
+#for ((port=1; $port <= 4; port = $port + 1 )); do
+#    echo "command: S${port}${on}"
+#    echo "S${port}${on}" > ${device}
+#done
