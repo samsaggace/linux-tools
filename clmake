@@ -3,5 +3,89 @@
 # Wrapper around make, to colorize it's output and pipe through less.
 # Jumps to the first gcc error that occurs during the build process.
 #
+# reworked by CLD.
+#  - correct error status
+#  - use zenity popups
+#  - filter out menuconfig and vim-invoked make (emacs ? who use it ?.. :))
+#
+# Environment vars:
+#  - FULL_COMMAND_PROMPT
+#  - USE_REMAKE
+#  - USE_MAKE_DBG
+#
 
-make $* 2>&1 | colormake.pl `stty size` | less -r -pError
+export IN_CLMAKE=y
+
+# get terminal size
+size="$(stty size)"
+
+start_date=$( date -u "+%s" )
+
+[ -n "${FULL_COMMAND_PROMPT}" ] && size=$(echo $size | awk '{print $1}')
+export USE_REMAKE=${USE_REMAKE:-n}
+
+if [[ "${USE_REMAKE}" == "y" ]]; then
+    export PATH=${LOCAL}/tools/remake:$PATH
+fi
+
+# helps debugging
+env | grep MAKE
+
+MAKE_DBG=" --debug=b "
+
+if [[ "${USE_MAKE_DBG}" == "y" ]]; then
+    MAKE_OPTS+=${MAKE_DBG}
+fi
+
+if [ -z "${CLMAKE_OPTS}" ]; then
+    CLMAKE_OPTS='-sR'
+fi
+
+if [ "$(basename $0 |cut -f1 -d-)" = "lmake" ]; then
+    echo "set USE_LESS for $0"
+    USE_LESS=y
+fi
+
+if [[ "$*" =~ menuconfig || "$*" =~ config || -n "$VIMRUNTIME" ]]; then
+    echo "Normal make"
+    make ${MAKE_OPTS} $*
+    RETVAL=$?
+elif [[ "$*" =~ debugger ]]; then
+    export PATH=${LOCAL}/tools/remake:$PATH
+    make ${MAKE_OPTS} $*
+    RETVAL=$?
+elif [[ "${USE_REMAKE}" = "y" ]]; then
+    if [[ "${USE_LESS}" = "y" ]]; then
+      echo USE_LESS
+      remake ${MAKE_OPTS} $* 2>&1 | colormake.pl ${size} | less ${CLMAKE_OPTS}
+    else
+      remake ${MAKE_OPTS} $* 2>&1 | colormake.pl ${size}
+    fi
+    RETVAL=${PIPESTATUS[0]}
+else
+    if [[ "${USE_LESS}" = "y" ]]; then
+      echo USE_LESS
+      make ${MAKE_OPTS} $* 2>&1 | colormake.pl ${size} | less ${CLMAKE_OPTS}
+    else
+      make ${MAKE_OPTS} $* 2>&1 | colormake.pl ${size}
+    fi
+    RETVAL=${PIPESTATUS[0]}
+fi
+
+end_date=$( date -u "+%s" )
+duration=$(( $end_date - $start_date ))
+
+
+printf "\n${LightWhite}%d:%02d:%02d\n" $(($duration / 3600)) $(($duration / 60)) $(($duration % 60))
+
+if [[ $RETVAL -eq 0 ]]; then
+    printf "${Green}OK${NC}\n"
+    [ -n "${MAKE_NOTIFY}" ] && zenity --info --timeout=10 --text "Make finished ($(pwd))" &
+else
+    printf "${bldred}FAILED:%d${NC}\n\n" $RETVAL
+    [ -n "${MAKE_NOTIFY}" ] && zenity --error  --timeout=10 --text "Make finished with ERROR ($(pwd)) " &
+fi
+
+# Thanks to Alexander Korkov and Kolan Sh
+exit ${RETVAL}
+# | less -r -pError
