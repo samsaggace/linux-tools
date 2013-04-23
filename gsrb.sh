@@ -23,7 +23,7 @@ for branch in $up_list; do
     echo -e "\nRebasing '$branch' on svn"
     git co $branch
     git svn rebase -l
-    git-patch-svn.sh $root_dir/$now/$branch
+    git-patch-svn.sh "$root_dir/$now/$branch"
 done
 echo -e "\n"
 git co $current

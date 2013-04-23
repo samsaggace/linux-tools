@@ -4,7 +4,7 @@
 set -e
 
 #Proto :
-dirname=$1
+dirname="$1"
 
 if [[  "$dirname" == "" ]]; then
     echo -e "Error in prototype, should be : $0 dirname"
