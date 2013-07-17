@@ -4,8 +4,12 @@ fpath=(~/Tools/tools/env/libs/zsh/prompts $fpath)
 
 # Lines configured by zsh-newuser-install
 HISTFILE=~/.histfile
-HISTSIZE=2000
-SAVEHIST=2000
+HISTSIZE=20000
+SAVEHIST=20000
+setopt INC_APPEND_HISTORY
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt SHARE_HISTORY
 
 alias e='export'
 alias a='alias'
@@ -135,8 +139,30 @@ alias gti='git'
 alias ggb='git gui blame'
 
 bindkey "\e[3~" delete-char
-bindkey "\e[H" beginning-of-line
-bindkey "\e[F" end-of-line
+bindkey "\e[H" beginning-of-line #Konsole
+bindkey "^[OH" beginning-of-line #Terminator
+bindkey "\e[F" end-of-line #Konsole
+bindkey "^[OF" end-of-line #Terminator
+
+#bindkey '^A'    beginning-of-line    # Home
+#bindkey '^E'    end-of-line          # End
+#bindkey '^D'    delete-char          # Del
+#bindkey '^[[1~' beginning-of-line    # Home
+#bindkey '^[[3~' delete-char          # Del
+#bindkey '^[[4~' end-of-line          # End
+bindkey '^[[5~' up-line-or-search     # Page  Up
+bindkey '^[[6~' down-line-or-search   # Page  Down
+#bindkey "^[[7~" beginning-of-line    # Home
+#bindkey "^[[8~" end-of-line          # End
+#bindkey "^[OH"  beginning-of-line
+#bindkey "^[OF"  end-of-line
+#bindkey "^[[H"  beginning-of-line
+#bindkey "^[[F"  end-of-line
+#
+#bindkey '^[[A'  up-line-or-search   # Up
+#bindkey '^[[D'  backward-char       # Left
+#bindkey '^[[B'  down-line-or-search # Down
+#bindkey '^[[C'  forward-char        # Right
 #------------------------------------------------------------------------------
 # Custom aliases
 #------------------------------------------------------------------------------
