@@ -17,6 +17,9 @@ alias u='unset'
 alias so='setopt'
 alias uo='unsetopt'
 
+alias sagi="sudo apt-get install"
+alias update="sudo -s -- sh -c 'apt-get update && apt-get upgrade'"
+alias sudos="sudo -s -- sh -c"
 
 bindkey -e
 # End of lines configured by zsh-newuser-install
