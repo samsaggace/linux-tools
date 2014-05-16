@@ -9,7 +9,7 @@ if [[ `git status -s -uno` != '' ]]; then
     git stash
 fi;
 
-root_dir="/home/sch/Patches/git_backup"
+root_dir="/home/$USER/Patches/git_backup"
 br_list=`git br`
 current=`echo "$br_list" | grep "^\*" | awk '{print $2}'`
 up_list=`echo "$br_list" | sed "s/[ *]//g" | grep -v "\-[0-9]\{10\}" | grep -v "^__"`
