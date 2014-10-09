@@ -173,9 +173,12 @@ bindkey '^[[6~' down-line-or-search   # Page  Down
 
 alias ll="ls -o -h -N --color=auto"
 alias la="ls -o -h -A --color=auto"
+alias ls='ls --color=auto'
+alias lt='ls -lAtr --color=auto'
 alias md="mkdir -p"
 alias df="df -h"
 
+alias grep='grep --color=auto'
 alias gp="grep --exclude-dir='.svn' --exclude-dir='.git' --exclude='cscope.*' --color=always -n -r"
 alias gpi="gp -i"
 alias cm="~/Tools/cmake"
@@ -253,3 +256,12 @@ compdef _command mytop
 
 
 alias ccs='mytop ccache -s'
+
+ngt () {
+    ngterm $1 | addr2loc.pl  -t $2 | tee  ~/ngterm_log/$(date +%y-%m-%d-%H-%M-%S).log
+}
+compdef '_arguments "1: :(`ls /dev/ttyUSB*`)" "2: :(`targets.sh`)"' ngt
+
+compdef '_arguments -s "-C:compile:" "-N:copy:" "-t:target:(`targets.sh`)" "1:IP:"' devSSH.pl
+
+compdef '_arguments "-t:target:(`targets.sh`)" "-b:from build:"' addr2loc.pl
