@@ -262,6 +262,22 @@ ngt () {
 }
 compdef '_arguments "1: :(`ls /dev/ttyUSB*`)" "2: :(`targets.sh`)"' ngt
 
-compdef '_arguments -s "-C:compile:" "-N:copy:" "-t:target:(`targets.sh`)" "1:IP:"' devSSH.pl
+compdef '_arguments  \
+    "-t[select target]:target:(`targets.sh`)" \
+    "-j-[parallel]:thread:" \
+    "1:IP:_hosts" \
+    "*:arg:_default" --' devSSH.pl
+#"-c,-[compil with options]:comp:(clean verbose)"
 
-compdef '_arguments "-t:target:(`targets.sh`)" "-b:from build:"' addr2loc.pl
+compdef '_arguments \
+    "-t[select target]:target:(`targets.sh`)" \
+    "-b:from build:" \
+    "*:arg: _default" --' addr2loc.pl
+
+compdef '_arguments \
+    "-d[Use real device]:device:(`devices.sh`)" \
+    "*:arg: _default" --' devAndroid.pl
+
+compdef _gnu_generic curl emacs emacsclient file head mv paste
+compdef _gnu_generic tail touch scrot shred watch wc zsh
+
