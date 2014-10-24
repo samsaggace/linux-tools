@@ -1,6 +1,0 @@
-alias e='export'
-alias a='alias'
-alias u='unset'
-alias so='setopt'
-alias uo='unsetopt'
-
