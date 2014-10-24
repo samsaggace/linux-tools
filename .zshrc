@@ -281,3 +281,14 @@ compdef '_arguments \
 compdef _gnu_generic curl emacs emacsclient file head mv paste
 compdef _gnu_generic tail touch scrot shred watch wc zsh
 
+ngup () {
+    if [ -n "$2" ] ; then
+        up="dist/targets/$2/upgrade.bin"
+    fi
+    dist/HOST/bin/snbupgrade-n25 $1 $up
+}
+
+compdef '_arguments \
+    "1:host:_hosts" \
+    "2:targets:(`targets.sh`)" \
+    "*:arg: _default" --' ngup
