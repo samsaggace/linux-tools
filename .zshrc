@@ -185,8 +185,6 @@ alias cm="~/Tools/cmake"
 
 #Pipe vi:
 alias -g V='|vi -R -'
-alias -g H='HEAD'
-alias -g H='HEAD'
 alias -g ...='../..'
 
 export PATH="$PATH:$HOME/Tools/"
@@ -254,6 +252,13 @@ mytop () {
 }
 compdef _command mytop
 
+#Highlight anything with a pipe
+hl ()
+{
+   sed "s/$1/\o033[1;31m&\o033[m/g"
+}
+alias -g H='| hl'
+
 
 alias ccs='mytop ccache -s'
 
@@ -292,3 +297,9 @@ compdef '_arguments \
     "1:host:_hosts" \
     "2:targets:(`targets.sh`)" \
     "*:arg: _default" --' ngup
+
+
+#Working but too long !
+#compdef '_arguments \
+#    "-t[edit file where tag is defined]:tag:_complete_tag" \
+#    "*:arg: _vim" --' gvim
