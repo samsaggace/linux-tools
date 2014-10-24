@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 title1=$(echo $1 | sed 's/ /\\\ /g')
 title2=$(echo $5 | sed 's/ /\\\ /g' | sed 's/.*\((.*)\)/\1/g')
@@ -17,4 +17,3 @@ file2=$5
 #fi
 
 gvim --nofork -d -geometry 271x64 "$file1" "$file2" +":set titlestring=git\\ diff\\ :\\ $title2"
-

@@ -1,6 +1,6 @@
 
 autoload -U colors && colors
-fpath=(~/Tools/tools/env/libs/zsh/prompts $fpath)
+fpath=(~/Tools/prompts $fpath)
 
 # Lines configured by zsh-newuser-install
 HISTFILE=~/.histfile

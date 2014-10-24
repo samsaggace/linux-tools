@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 title1=$(echo $3 | sed 's/ /\\\ /g')
 title2=$(echo $5 | sed 's/ /\\\ /g' | sed 's/.*\((.*)\)/\1/g')
@@ -17,4 +17,3 @@ if [ $? = 0 ]; then
 fi
 
 gvim --nofork -d -geometry 234x58 "$file1" "$file2" +":set titlestring=$title1\\ \\ VS.\\ \\ $title2"
-

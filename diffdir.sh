@@ -3,7 +3,7 @@ shname=`echo "$0" | awk -F / '{print $NF}'`
 #*******************************************************************************
 # *             Copyright (c) 2000 2008 SAGEM SA.
 # *
-# * Author        : Jerome Labarthe 
+# * Author        : Jerome Labarthe
 # * Creation date : 24/02/2010
 # *..............................................................................
 Description="Directory or svn url comparaison with vim"
@@ -71,4 +71,3 @@ if [ "$dirnameb" != "" ]; then
    echo "Removing temp dir $dir2..."
    rm -rf "$dir2"
 fi
-
