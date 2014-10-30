@@ -280,7 +280,8 @@ compdef '_arguments \
     "*:arg: _default" --' addr2loc.pl
 
 compdef '_arguments \
-    "-d[Use real device]:device:(`devices.sh`)" \
+    "-s[Use specific device]:device:(`devices.sh`)" \
+    "-t[Select target]:target:(`appli.sh`)" \
     "*:arg: _default" --' devAndroid.pl
 
 compdef _gnu_generic curl emacs emacsclient file head mv paste
