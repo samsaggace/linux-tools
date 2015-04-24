@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# Redirect output to stderr.
+
+keywords=(dpm dvm print_r var_dump throw console.log debugger dump NGM.trace)
+keywords_for_grep=$(printf "|%s" "${keywords[@]}")
+keywords_for_grep=${keywords_for_grep:1}
+files_changed=`git diff-index --cached --name-only HEAD --`
+`git grep -q -E "$keywords_for_grep" $files_changed`
+number_of_results=$?
+
+if [ $number_of_results -eq 0 ]
+then
+  echo "# Check following lines:"
+  for FILE in ${files_changed[*]} ; do
+    for keyword in ${keywords[*]} ; do
+      `git grep -q $keyword $FILE`
+      result_for_file=$?
+      if [ $result_for_file -eq 0 ]
+      then
+        LINE=`git grep -n $keyword $FILE | awk -F ":" '{print $2}'`
+        echo "$FILE contains $keyword at line $LINE."
+      fi
+    done
+  done
+  exit 1
+fi
