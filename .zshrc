@@ -285,7 +285,7 @@ compdef '_arguments \
     "*:arg: _default" --' devAndroid.pl
 
 compdef _gnu_generic curl emacs emacsclient file head mv paste
-compdef _gnu_generic tail touch scrot shred watch wc zsh
+compdef _gnu_generic tail touch scrot shred wc zsh
 
 ngup () {
     if [ -n "$2" ] ; then
