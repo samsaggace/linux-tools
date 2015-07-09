@@ -137,6 +137,7 @@ prompt seb
 
 alias vi='gvim -geometry=133x150'
 alias vir='vi --remote-silent'
+alias vil='vi -u NONE -R'
 alias vid='gvim -d'
 alias gti='git'
 alias ggb='git gui blame'
@@ -179,7 +180,7 @@ alias md="mkdir -p"
 alias df="df -h"
 
 alias grep='grep --color=auto'
-alias gp="grep --exclude-dir='.svn' --exclude-dir='.git' --exclude='cscope.*' --color=always -n -r"
+alias gp="grep --exclude-dir='.git' --exclude='cscope.*' --exclude='tags*' --color=auto -n -r"
 alias gpi="gp -i"
 alias cm="~/Tools/cmake"
 
@@ -304,3 +305,7 @@ compdef '_arguments \
 #compdef '_arguments \
 #    "-t[edit file where tag is defined]:tag:_complete_tag" \
 #    "*:arg: _vim" --' gvim
+
+gk () {
+    gitk $@ &
+}
