@@ -1,6 +1,56 @@
+export PATH="$PATH:$HOME/Tools/"
 
-autoload -U colors && colors
-fpath=(~/Tools/prompts $fpath)
+
+source antigen.zsh
+
+antigen-use oh-my-zsh
+antigen-bundle git
+antigen bundle zsh-users/zsh-syntax-highlighting
+antigen bundle composer
+antigen bundle bundler
+#antigen bundle docker
+antigen bundle felixr/docker-zsh-completion
+antigen bundle pip
+antigen bundle rsync
+antigen bundle python
+antigen bundle zsh-users/zsh-completions src
+antigen bundle command-not-found
+antigen bundle history
+antigen bundle vundle
+antigen bundle gem
+antigen bundle ruby
+antigen bundle rbenv
+#antigen bundle https://gist.github.com/4644554.git 
+#antigen bundle ubuntu
+antigen bundle colorize
+
+antigen theme bureau
+
+antigen apply
+
+ZSH_THEME_GIT_PROMPT_UNSTAGED="%{$fg_bold[red]%}●%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg_bold[yellow]%}●%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_STASHED="%{$fg_bold[magenta]%}★%{$reset_color%}"
+
+export MATRICULE='sebastien'
+export MYHOST='sebastien-e7440'
+
+export SSH_ASKPASS=/usr/bin/ksshaskpass
+if ! ssh-add -l > /dev/null; then
+    ssh-add $HOME/.ssh/id_rsa $HOME/.ssh/gitlab.key < /dev/null > /dev/null 2>&1
+fi
+#source ~/Tools/.zshrc
+
+alias vi='gvim -geometry=133x150'
+alias vir='vi --remote-silent'
+alias vil='vi -u NONE -R'
+alias vid='gvim -d'
+alias gti='git'
+alias ggb='git gui blame'
+
+alias grep='grep --color=auto'
+alias gp="grep --exclude-dir='.git' --exclude='cscope.*' --exclude='tags*' --color=auto -n -r"
+alias gpi="gp -i"
 
 # Lines configured by zsh-newuser-install
 HISTFILE=~/.histfile
@@ -11,208 +61,12 @@ setopt EXTENDED_HISTORY
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt SHARE_HISTORY
 
-alias e='export'
-alias a='alias'
-alias u='unset'
-alias so='setopt'
-alias uo='unsetopt'
+export PATH=$PATH:/home/sebastien/dev-git/tiny-tools/bin
+. /home/sebastien/dev-git/tiny-tools/bin/bashrc
 
-alias sagi="sudo apt-get install"
-alias update="sudo -s -- sh -c 'apt-get update && apt-get upgrade'"
-alias sudos="sudo -s -- sh -c"
+export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init -)"
 
-bindkey -e
-# End of lines configured by zsh-newuser-install
-# The following lines were added by compinstall
-zstyle :compinstall filename "$HOME/.zshrc"
-
-autoload -Uz compinit
-compinit
-# End of lines added by compinstall
-
-autoload -U is-at-least
-
-if is-at-least 4.3.8; then
-    # VCS info :
-    autoload -Uz vcs_info
-    # check-for-changes can be really slow.
-    # you should disable it, if you work with large repositories
-    zstyle ':vcs_info:*' enable git cvs svn hg
-    zstyle ':vcs_info:*' check-for-changes true
-    zstyle ':vcs_info:*' unstagedstr '%F{red}●'
-    zstyle ':vcs_info:*' stagedstr '%F{green}●'
-    zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat '%b%F{1}:%F{11}%r'
-    zstyle ':vcs_info:hg:*' branchformat '%b'
-    zstyle ':vcs_info:*' get-revision true
-    zstyle ':vcs_info:git*+set-message:*' hooks git-stash
-fi
-
-# Show count of stashed changes
-function +vi-git-stash() {
-    local -a stashes
-
-    if [[ -s ${hook_com[base]}/.git/refs/stash ]] ; then
-        stashes=$(git stash list 2>/dev/null | wc -l)
-        hook_com[misc]+=" (${stashes})"
-    fi
-}
-
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' menu yes select
-zstyle ':completion:*' force-list always
-zstyle ':completion:*' menu select=1
-
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path ~/.zsh/cache
-
-zstyle '*:processes-names' command 'ps -e -o comm='
-zstyle '*:processes' command 'ps -au$USER'
-
-setopt append_history
-setopt autocd
-setopt auto_menu
-setopt auto_param_slash
-setopt auto_remove_slash
-setopt auto_pushd
-unsetopt beep
-setopt chase_links
-setopt complete_in_word
-setopt correct
-setopt csh_junkie_history
-setopt extended_glob
-setopt extended_history
-unsetopt hist_beep
-setopt hist_find_no_dups
-setopt hist_ignore_all_dups
-setopt hist_verify
-unsetopt list_beep
-setopt list_rows_first
-setopt inc_append_history
-setopt pushd_ignore_dups
-setopt pushd_to_home
-unsetopt function_argzero
-
-autoload -U zmv
-
-autoload -U bashcompinit
-bashcompinit
-
-#bash_source() {
-#  alias shopt=':'
-#  alias _expand=_bash_expand
-#  alias _complete=_bash_comp
-#  emulate -L sh
-#  setopt kshglob noshglob braceexpand
-#
-#  have() {
-#    unset have
-#    (( ${+commands[$1]} )) && have=yes
-#  }
-#
-#  source "$@"
-#}
-#
-#bash_source /etc/bash_completion.d/openssl
-
-#------------------------------------------------------------------------------
-# Compinstall configuration
-#------------------------------------------------------------------------------
-zstyle ':completion:*' completer _expand _complete
-zstyle ':completion:*' completions 1
-zstyle ':completion:*' glob 1
-zstyle ':completion:*' insert-unambiguous true
-zstyle ':completion:*' max-errors 1 not-numeric
-zstyle ':completion:*' original true
-zstyle ':completion:*' squeeze-slashes true
-zstyle ':completion:*' substitute 1
-zstyle ':completion:*' verbose true
-#zstyle ':completion:*' menu select=2
-zstyle ':completion:*:*:kill:*' menu yes select
-zstyle ':completion:*:kill:*'   force-list always
-
-
-autoload -U promptinit 
-promptinit
-prompt seb
-
-alias vi='gvim -geometry=133x150'
-alias vir='vi --remote-silent'
-alias vil='vi -u NONE -R'
-alias vid='gvim -d'
-alias gti='git'
-alias ggb='git gui blame'
-
-bindkey "\e[3~" delete-char
-bindkey "\e[H" beginning-of-line #Konsole
-bindkey "^[OH" beginning-of-line #Terminator
-bindkey "\e[F" end-of-line #Konsole
-bindkey "^[OF" end-of-line #Terminator
-
-#bindkey '^A'    beginning-of-line    # Home
-#bindkey '^E'    end-of-line          # End
-#bindkey '^D'    delete-char          # Del
-#bindkey '^[[1~' beginning-of-line    # Home
-#bindkey '^[[3~' delete-char          # Del
-#bindkey '^[[4~' end-of-line          # End
-bindkey '^[[5~' up-line-or-search     # Page  Up
-bindkey '^[[6~' down-line-or-search   # Page  Down
-#bindkey "^[[7~" beginning-of-line    # Home
-#bindkey "^[[8~" end-of-line          # End
-#bindkey "^[OH"  beginning-of-line
-#bindkey "^[OF"  end-of-line
-#bindkey "^[[H"  beginning-of-line
-#bindkey "^[[F"  end-of-line
-#
-#bindkey '^[[A'  up-line-or-search   # Up
-#bindkey '^[[D'  backward-char       # Left
-#bindkey '^[[B'  down-line-or-search # Down
-#bindkey '^[[C'  forward-char        # Right
-#------------------------------------------------------------------------------
-# Custom aliases
-#------------------------------------------------------------------------------
-
-
-alias ll="ls -o -h -N --color=auto"
-alias la="ls -o -h -A --color=auto"
-alias ls='ls --color=auto'
-alias lt='ls -lAtr --color=auto'
-alias md="mkdir -p"
-alias df="df -h"
-
-alias grep='grep --color=auto'
-alias gp="grep --exclude-dir='.git' --exclude='cscope.*' --exclude='tags*' --color=auto -n -r"
-alias gpi="gp -i"
-alias cm="~/Tools/cmake"
-
-#Pipe vi:
-alias -g V='|vi -R -'
-alias -g ...='../..'
-
-export PATH="$PATH:$HOME/Tools/"
-export MANPAGER='manpagervim.sh'
-export JS_CMD='jsc'
-
-
-#------------------------------------------------------------------------------
-# Custom suffixes aliases
-#------------------------------------------------------------------------------
-alias -s pdf="evince "
-alias -s c="vi "
-alias -s cpp="vi "
-alias -s h="vi "
-alias -s txt="vi "
-alias -s log="vi "
-alias -s htm="google-chrome "
-alias -s html="google-chrome "
-
-#------------------------------------------------------------------------------
-# HOOKS
-#------------------------------------------------------------------------------
-CmdTimeProcess="no"
-CmdLaunched="yes"
-
-#------------------------------------------------------------------------------
-#Open a greped file with vi at the right line :
 
 compdefas () {
   local a
@@ -243,69 +97,15 @@ p () {
    echo "$pri";
 }
 
-mytop () {
-    while (true); do
-        clear;
-        echo -e "\x1b[f";
-        $*;
-        sleep 1;
-    done;
-}
-compdef _command mytop
-
-#Highlight anything with a pipe
-hl ()
-{
-   sed "s/$1/\o033[1;31m&\o033[m/g"
-}
-alias -g H='| hl'
-
-
-alias ccs='mytop ccache -s'
-
-ngt () {
-    ngterm $1 | addr2loc.pl  -t $2 | tee  ~/ngterm_log/$(date +%y-%m-%d-%H-%M-%S).log
-}
-compdef '_arguments "1: :(`ls /dev/ttyUSB*`)" "2: :(`targets.sh`)"' ngt
-
-compdef '_arguments  \
-    "-t[select target]:target:(`targets.sh`)" \
-    "-j-[parallel]:thread:" \
-    "1:IP:_hosts" \
-    "*:arg:_default" --' devSSH.pl
-#"-c,-[compil with options]:comp:(clean verbose)"
-
-compdef '_arguments \
-    "-t[select target]:target:(`targets.sh`)" \
-    "-b:from build:" \
-    "*:arg: _default" --' addr2loc.pl
-
-compdef '_arguments \
-    "-s[Use specific device]:device:(`devices.sh`)" \
-    "-t[Select target]:target:(`appli.sh`)" \
-    "*:arg: _default" --' devAndroid.pl
-
-compdef _gnu_generic curl emacs emacsclient file head mv paste
-compdef _gnu_generic tail touch scrot shred wc zsh
-
-ngup () {
-    if [ -n "$2" ] ; then
-        up="dist/targets/$2/upgrade.bin"
-    fi
-    dist/HOST/bin/snbupgrade-n25 $1 $up
+kplasma() {
+    killall plasmashell
+    kstart plasmashell > /dev/null 2>&1 &
 }
 
-compdef '_arguments \
-    "1:host:_hosts" \
-    "2:targets:(`targets.sh`)" \
-    "*:arg: _default" --' ngup
+#Pipe vi:
+alias -g V='|vi -R -'
+alias -g ...='../..'
 
+export MANPAGER='manpagervim.sh'
 
-#Working but too long !
-#compdef '_arguments \
-#    "-t[edit file where tag is defined]:tag:_complete_tag" \
-#    "*:arg: _vim" --' gvim
-
-gk () {
-    gitk $@ &
-}
+compdef _gnu_generic git-review
