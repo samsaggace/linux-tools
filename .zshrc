@@ -67,6 +67,7 @@ export PATH=$PATH:/home/sebastien/dev-git/tiny-tools/bin
 export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 
+export PATH="$HOME/.composer/vendor/bin:$PATH"
 
 compdefas () {
   local a
