@@ -41,7 +41,6 @@ if ! ssh-add -l > /dev/null; then
 fi
 #source ~/Tools/.zshrc
 
-alias vi='gvim -geometry=133x150'
 alias vir='vi --remote-silent'
 alias vil='vi -u NONE -R'
 alias vid='gvim -d'
@@ -77,14 +76,14 @@ compdefas () {
 }
 
 vig () {
-   vi_file=`echo "$1" | awk -F : '{print $1}'`;
-   vi_line=`echo "$1" | awk -F : '{print $2}'`;
+   local vi_file=`echo "$1" | awk -F : '{print $1}'`;
+   local vi_line=`echo "$1" | awk -F : '{print $2}'`;
    vi $vi_file +$vi_line;
 }
 
 vic () {
-   vi_file=`echo "$1" | awk -F : '{print $1}'`;
-   vi_line=`echo "$1" | awk -F : '{print $2}'`;
+   local vi_file=`echo "$1" | awk -F : '{print $1}'`;
+   local vi_line=`echo "$1" | awk -F : '{print $2}'`;
    vi -t $vi_file +$vi_line;
 }
 
@@ -93,8 +92,22 @@ viw () {
 }
 compdefas which viw
 
+vi () {
+    local toplevel=`git rev-parse --show-toplevel 2> /dev/null || pwd`
+    local serverlist=`gvim --serverlist`
+    local title=`basename $toplevel`
+    echo "$serverlist" | grep -iq "$toplevel"
+    if [ $? -eq 0 ]; then
+        gvim --servername $toplevel --remote-send ":call foreground()<CR>" --remote $@ 2> /dev/null
+    else
+        gvim --servername $toplevel -c "set titlestring=$title" $@ 2> /dev/null
+    fi
+}
+
+
+
 p () {
-    pri="$(( $@ ))"
+   local pri="$(( $@ ))"
    echo "$pri";
 }
 
