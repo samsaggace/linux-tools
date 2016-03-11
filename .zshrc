@@ -1,7 +1,7 @@
 export PATH="$PATH:$HOME/Tools/"
 
 
-source antigen.zsh
+source $HOME/antigen/antigen.zsh
 
 antigen-use oh-my-zsh
 antigen-bundle git
@@ -98,7 +98,7 @@ vi () {
     local title=`basename $toplevel`
     echo "$serverlist" | grep -iq "$toplevel"
     if [ $? -eq 0 ]; then
-        gvim --servername $toplevel --remote-send ":call foreground()<CR>" --remote $@ 2> /dev/null
+        gvim --servername $toplevel --remote-send ":call foreground()<CR>" --remote-send "<CR>:e $1<CR>" 2> /dev/null
     else
         gvim --servername $toplevel -c "set titlestring=$title" $@ 2> /dev/null
     fi
@@ -123,3 +123,4 @@ alias -g ...='../..'
 export MANPAGER='manpagervim.sh'
 
 compdef _gnu_generic git-review
+compdef _gnu_generic phpunit php-cs-fixer
