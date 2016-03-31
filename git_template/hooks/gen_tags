@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+PATH="/usr/local/bin:$PATH"
+dir="`git rev-parse --git-dir`"
+trap 'rm -f "$dir/$$.tags" "$dir/$$.cscope.out"' EXIT
+git grep --cached -Ile '' > "$dir/cscope.files"
+cscope -kRb -i "$dir/cscope.files" -f "$dir/$$.cscope.out"
+ctags -R --fields=+lStn --extra=+f --tag-relative=yes --links=no -L "$dir/cscope.files" -f "$dir/$$.tags"
+
+mv "$dir/$$.tags" "$dir/tags"
+mv "$dir/$$.cscope.out" "$dir/cscope.out"

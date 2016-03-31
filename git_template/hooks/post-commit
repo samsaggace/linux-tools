@@ -1,0 +1,2 @@
+#!/bin/sh
+.git/hooks/gen_tags >/dev/null 2>&1 &
