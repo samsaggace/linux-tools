@@ -1,7 +1,12 @@
 # Tools
 
 ## Installation
-* Just clone it in ~/Tools
+```bash
+git clone https://github.com/samsaggace/linux-tools.git ~/Tools
+ln -s ~/Tools/.zshrc ~/.zshrc
+ln -s ~/Tools/git_template ~/.git_template
+ln -s ~/Tools/git.config ~/.gitconfig
+```
 
 ## What's in ?
 
