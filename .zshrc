@@ -63,10 +63,10 @@ setopt SHARE_HISTORY
 export PATH=$PATH:/home/sebastien/dev-git/tiny-tools/bin
 . /home/sebastien/dev-git/tiny-tools/bin/bashrc
 
-export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
+#export PATH="$HOME/.rbenv/bin:$PATH"
+#eval "$(rbenv init -)"
 
-export PATH="$HOME/.composer/vendor/bin:$PATH"
+export DOCKER_HOST=tcp://10.100.0.1:4243
 
 compdefas () {
   local a
