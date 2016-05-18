@@ -32,4 +32,9 @@ apt-get install \
     gitk \
     php \
     php-fdomdocument \
-    aptitude
+    aptitude \
+    openjdk-8-jdk openjdk-8-jre \
+    bison flex \
+    cscope \
+    tilda \
+
