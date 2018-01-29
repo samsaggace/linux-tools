@@ -1,14 +1,14 @@
-export PATH="$PATH:$HOME/Tools/"
+export PATH="$PATH:$HOME/Tools"
 
-
+source /usr/local/share/antigen/antigen.zsh
 source $HOME/antigen/antigen.zsh
 
-antigen-use oh-my-zsh
-antigen-bundle git
+antigen use oh-my-zsh
+antigen bundle git
+
 antigen bundle zsh-users/zsh-syntax-highlighting
 antigen bundle composer
 antigen bundle bundler
-#antigen bundle docker
 antigen bundle felixr/docker-zsh-completion
 antigen bundle pip
 antigen bundle rsync
@@ -20,9 +20,10 @@ antigen bundle vundle
 antigen bundle gem
 antigen bundle ruby
 antigen bundle rbenv
-#antigen bundle https://gist.github.com/4644554.git 
-#antigen bundle ubuntu
 antigen bundle colorize
+antigen bundle brew
+antigen bundle golang
+antigen bundle docker
 
 antigen theme bureau
 
@@ -60,13 +61,9 @@ setopt EXTENDED_HISTORY
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt SHARE_HISTORY
 
-export PATH=$PATH:/home/sebastien/dev-git/tiny-tools/bin
-. /home/sebastien/dev-git/tiny-tools/bin/bashrc
-
 #export PATH="$HOME/.rbenv/bin:$PATH"
 #eval "$(rbenv init -)"
 
-export DOCKER_HOST=tcp://10.100.0.1:4243
 
 compdefas () {
   local a
@@ -124,3 +121,7 @@ export MANPAGER='manpagervim.sh'
 
 compdef _gnu_generic git-review
 compdef _gnu_generic phpunit php-cs-fixer
+
+
+
+alias brewup='brew update; brew upgrade; brew prune; brew cleanup; brew doctor'
