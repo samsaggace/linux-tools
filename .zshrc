@@ -24,6 +24,7 @@ antigen bundle colorize
 antigen bundle brew
 antigen bundle golang
 antigen bundle docker
+antigen bundle thefuck
 
 antigen theme bureau
 
@@ -64,7 +65,6 @@ setopt SHARE_HISTORY
 #export PATH="$HOME/.rbenv/bin:$PATH"
 #eval "$(rbenv init -)"
 
-
 compdefas () {
   local a
   a="$1"
@@ -90,15 +90,7 @@ viw () {
 compdefas which viw
 
 vi () {
-    local toplevel=`git rev-parse --show-toplevel 2> /dev/null || pwd`
-    local serverlist=`gvim --serverlist`
-    local title=`basename $toplevel`
-    echo "$serverlist" | grep -iq "$toplevel"
-    if [ $? -eq 0 ]; then
-        gvim --servername $toplevel --remote-send ":call foreground()<CR>" --remote-send "<CR>:e $1<CR>" 2> /dev/null
-    else
-        gvim --servername $toplevel -c "set titlestring=$title" $@ 2> /dev/null
-    fi
+    gvim $@ 2> /dev/null
 }
 
 
@@ -125,3 +117,29 @@ compdef _gnu_generic phpunit php-cs-fixer
 
 
 alias brewup='brew update; brew upgrade; brew prune; brew cleanup; brew doctor'
+# Define a Shell alias
+alias cassh='docker run -it -u $(id -u) -e HOME=${HOME} -w ${HOME} -v ${HOME}/.ssh:${HOME}/.ssh -v ${HOME}/.cassh:${HOME}/.cassh:ro --rm nbeguier/cassh-client'
+
+
+SSH_KEY_BASE=${HOME}/.ssh/id_rsa
+
+function diff_ssh_cert {
+  if ! diff -q <(ssh-add -L ${SSH_KEY_BASE} | grep ssh-rsa-cert | awk '{print $2}') <(cat ${SSH_KEY_BASE}-cert.pub | awk '{print $2}') >/dev/null 2>&1; then
+    ssh-add -D >/dev/null 2>&1
+    ssh-add ${SSH_KEY_BASE} >/dev/null 2>&1  
+  fi
+}
+
+function start_start_agent {
+  SSH_AGENT_PID=$(pgrep ssh-agent | head -1)
+  if [ -z "${SSH_AGENT_PID}" ]; then
+    ssh-agent > /tmp/ssh_agent.eval
+    eval "$(cat /tmp/ssh_agent.eval)" >/dev/null
+    ssh-add ${SSH_KEY_BASE} >/dev/null 2>&1
+  else
+    eval "$(cat /tmp/ssh_agent.eval)" >/dev/null
+    diff_ssh_cert
+  fi
+}
+
+start_start_agent
