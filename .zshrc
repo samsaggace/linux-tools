@@ -1,43 +1,49 @@
-export PATH="$PATH:$HOME/Tools"
+export PATH="$PATH:$HOME/Tools:$HOME/go/bin/"
 
-source /usr/local/share/antigen/antigen.zsh
-source $HOME/antigen/antigen.zsh
 
-antigen use oh-my-zsh
-antigen bundle git
+source "${HOME}/.zgen/zgen.zsh"
+if ! zgen saved; then
+echo "Creating a zgen save"
+    zgen oh-my-zsh
 
-antigen bundle zsh-users/zsh-syntax-highlighting
-antigen bundle composer
-antigen bundle bundler
-antigen bundle felixr/docker-zsh-completion
-antigen bundle pip
-antigen bundle rsync
-antigen bundle python
-antigen bundle zsh-users/zsh-completions src
-antigen bundle command-not-found
-antigen bundle history
-antigen bundle vundle
-antigen bundle gem
-antigen bundle ruby
-antigen bundle rbenv
-antigen bundle colorize
-antigen bundle brew
-antigen bundle golang
-antigen bundle docker
-antigen bundle thefuck
+    # plugins
+    zgen oh-my-zsh plugins/git
+    zgen oh-my-zsh plugins/sudo
+    zgen oh-my-zsh plugins/command-not-found
+    zgen load zsh-users/zsh-syntax-highlighting
+    zgen load zsh-users/zsh-history-substring-search
+    #zgen load bhilburn/powerlevel9k powerlevel9k
+    zgen load junegunn/fzf
 
-antigen theme bureau
 
-antigen apply
+    zgen oh-my-zsh plugins/composer
+    zgen oh-my-zsh plugins/bundler
+    zgen oh-my-zsh plugins/pip
+    zgen oh-my-zsh plugins/rsync
+    zgen oh-my-zsh plugins/python
+    zgen oh-my-zsh plugins/history
+    zgen oh-my-zsh plugins/vundle
+    zgen oh-my-zsh plugins/gem
+    zgen oh-my-zsh plugins/ruby
+    zgen oh-my-zsh plugins/rbenv
+    zgen oh-my-zsh plugins/colorize
+    zgen oh-my-zsh plugins/golang
+    zgen oh-my-zsh plugins/docker
+    zgen oh-my-zsh plugins/thefuck
+    zgen oh-my-zsh plugins/repo
+    zgen oh-my-zsh plugins/npm
+    zgen oh-my-zsh plugins/node
 
-ZSH_THEME_GIT_PROMPT_UNSTAGED="%{$fg_bold[red]%}●%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg_bold[yellow]%}●%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_STASHED="%{$fg_bold[magenta]%}★%{$reset_color%}"
+    # completions
+    zgen load zsh-users/zsh-completions src
 
-export MATRICULE='sebastien'
-export MYHOST='sebastien-e7440'
+    # theme
+    zgen load denysdovhan/spaceship-prompt spaceship
 
-export SSH_ASKPASS=/usr/bin/ksshaskpass
+    # save all to init script
+    zgen save
+fi
+
 if ! ssh-add -l > /dev/null; then
     ssh-add $HOME/.ssh/id_rsa $HOME/.ssh/gitlab.key < /dev/null > /dev/null 2>&1
 fi
@@ -116,7 +122,7 @@ compdef _gnu_generic phpunit php-cs-fixer
 
 
 
-alias brewup='brew update; brew upgrade; brew prune; brew cleanup; brew doctor'
+alias brewup='brew upgrade; brew prune; brew cleanup; brew doctor; brew cask upgrade; brew cask cleanup; brew cask doctor'
 # Define a Shell alias
 alias cassh='docker run -it -u $(id -u) -e HOME=${HOME} -w ${HOME} -v ${HOME}/.ssh:${HOME}/.ssh -v ${HOME}/.cassh:${HOME}/.cassh:ro --rm nbeguier/cassh-client'
 
@@ -142,4 +148,14 @@ function start_start_agent {
   fi
 }
 
-start_start_agent
+#start_start_agent
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
+export PATH="/usr/local/sbin:$PATH"
+
+fpath=($HOME/.zsh-completion.d/ $fpath)
+compinit
