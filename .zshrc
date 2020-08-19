@@ -115,14 +115,14 @@ kplasma() {
 alias -g V='|vi -R -'
 alias -g ...='../..'
 
-export MANPAGER='manpagervim.sh'
+export MANPAGER='~/linux-tools/manpagervim.sh'
 
 compdef _gnu_generic git-review
 compdef _gnu_generic phpunit php-cs-fixer
 
 
 
-alias brewup='brew upgrade; brew prune; brew cleanup; brew doctor; brew cask upgrade; brew cask cleanup; brew cask doctor'
+alias brewup='brew upgrade; brew cleanup; brew cask upgrade'
 # Define a Shell alias
 alias cassh='docker run -it -u $(id -u) -e HOME=${HOME} -w ${HOME} -v ${HOME}/.ssh:${HOME}/.ssh -v ${HOME}/.cassh:${HOME}/.cassh:ro --rm nbeguier/cassh-client'
 
@@ -132,7 +132,7 @@ SSH_KEY_BASE=${HOME}/.ssh/id_rsa
 function diff_ssh_cert {
   if ! diff -q <(ssh-add -L ${SSH_KEY_BASE} | grep ssh-rsa-cert | awk '{print $2}') <(cat ${SSH_KEY_BASE}-cert.pub | awk '{print $2}') >/dev/null 2>&1; then
     ssh-add -D >/dev/null 2>&1
-    ssh-add ${SSH_KEY_BASE} >/dev/null 2>&1  
+    ssh-add ${SSH_KEY_BASE} >/dev/null 2>&1
   fi
 }
 
@@ -159,3 +159,4 @@ export PATH="/usr/local/sbin:$PATH"
 
 fpath=($HOME/.zsh-completion.d/ $fpath)
 compinit
+[ -f "${GHCUP_INSTALL_BASE_PREFIX:=$HOME}/.ghcup/env" ] && source "${GHCUP_INSTALL_BASE_PREFIX:=$HOME}/.ghcup/env"
