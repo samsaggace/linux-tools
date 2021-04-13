@@ -31,8 +31,9 @@ echo "Creating a zgen save"
     zgen oh-my-zsh plugins/docker
     zgen oh-my-zsh plugins/thefuck
     zgen oh-my-zsh plugins/repo
-    zgen oh-my-zsh plugins/npm
     zgen oh-my-zsh plugins/node
+    zgen oh-my-zsh plugins/fabric
+    zgen load lukechilds/zsh-better-npm-completion
 
     # completions
     zgen load zsh-users/zsh-completions src
@@ -45,9 +46,8 @@ echo "Creating a zgen save"
 fi
 
 if ! ssh-add -l > /dev/null; then
-    ssh-add $HOME/.ssh/id_rsa $HOME/.ssh/gitlab.key < /dev/null > /dev/null 2>&1
+    ssh-add -K $HOME/.ssh/id_rsa  < /dev/null > /dev/null 2>&1
 fi
-#source ~/Tools/.zshrc
 
 alias vir='vi --remote-silent'
 alias vil='vi -u NONE -R'
@@ -99,16 +99,9 @@ vi () {
     gvim $@ 2> /dev/null
 }
 
-
-
 p () {
    local pri="$(( $@ ))"
    echo "$pri";
-}
-
-kplasma() {
-    killall plasmashell
-    kstart plasmashell > /dev/null 2>&1 &
 }
 
 #Pipe vi:
@@ -117,46 +110,62 @@ alias -g ...='../..'
 
 export MANPAGER='~/linux-tools/manpagervim.sh'
 
-compdef _gnu_generic git-review
-compdef _gnu_generic phpunit php-cs-fixer
-
-
 
 alias brewup='brew upgrade; brew cleanup; brew cask upgrade'
 # Define a Shell alias
-alias cassh='docker run -it -u $(id -u) -e HOME=${HOME} -w ${HOME} -v ${HOME}/.ssh:${HOME}/.ssh -v ${HOME}/.cassh:${HOME}/.cassh:ro --rm nbeguier/cassh-client'
-
 
 SSH_KEY_BASE=${HOME}/.ssh/id_rsa
 
-function diff_ssh_cert {
-  if ! diff -q <(ssh-add -L ${SSH_KEY_BASE} | grep ssh-rsa-cert | awk '{print $2}') <(cat ${SSH_KEY_BASE}-cert.pub | awk '{print $2}') >/dev/null 2>&1; then
-    ssh-add -D >/dev/null 2>&1
-    ssh-add ${SSH_KEY_BASE} >/dev/null 2>&1
-  fi
-}
-
-function start_start_agent {
-  SSH_AGENT_PID=$(pgrep ssh-agent | head -1)
-  if [ -z "${SSH_AGENT_PID}" ]; then
-    ssh-agent > /tmp/ssh_agent.eval
-    eval "$(cat /tmp/ssh_agent.eval)" >/dev/null
-    ssh-add ${SSH_KEY_BASE} >/dev/null 2>&1
-  else
-    eval "$(cat /tmp/ssh_agent.eval)" >/dev/null
-    diff_ssh_cert
-  fi
-}
-
-#start_start_agent
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 
 fpath=($HOME/.zsh-completion.d/ $fpath)
 compinit
-[ -f "${GHCUP_INSTALL_BASE_PREFIX:=$HOME}/.ghcup/env" ] && source "${GHCUP_INSTALL_BASE_PREFIX:=$HOME}/.ghcup/env"
+
+eval $(thefuck --alias)
+
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=`which python3`
+source /usr/local/bin/virtualenvwrapper.sh
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/etc/bash_completion.d/nvm" ] && . "$NVM_DIR/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+# place this after nvm initialization, will switch to the correct node version automatically
+autoload -U add-zsh-hook
+load-nvmrc() {
+  local node_version="$(nvm version)"
+  local nvmrc_path="$(nvm_find_nvmrc)"
+  local nvmrc_vers
+
+  if [ -n "$nvmrc_path" ]; then
+    nvmrc_vers="$(cat "${nvmrc_path}")"
+  else
+    nvmrc_vers="stable"
+  fi
+
+  local nvmrc_node_version=$(nvm version ${nvmrc_vers})
+  local nvmrc_remote_version=$(nvm version-remote ${nvmrc_vers})
+
+  if [ "$nvmrc_node_version" = "N/A" ]; then
+    nvm install
+  elif [ "$nvmrc_remote_version" != "$nvmrc_node_version" ]; then
+    echo "[NVM] Updating node/npm to latest version : $nvmrc_remote_version != $nvmrc_node_version "
+    nvm install --reinstall-packages-from=$nvmrc_node_version
+  elif [ "$nvmrc_node_version" != "$node_version" ]; then
+    echo "[NVM] Using ${nvmrc_vers} version"
+    nvm use ${nvmrc_vers}
+  fi
+}
+add-zsh-hook chpwd load-nvmrc
+load-nvmrc
+
+
+alias vlc='/Applications/VLC.app/Contents/MacOS/VLC'
+
+alias ls='lsd'
+
+
