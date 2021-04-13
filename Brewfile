@@ -24,6 +24,7 @@ brew "jq"
 brew "libmemcached"
 brew "lsd"
 brew "macvim"
+brew "mas"
 brew "memcached", restart_service: true
 brew "openjdk"
 brew "postgresql", restart_service: true
@@ -44,3 +45,14 @@ cask "kdiff3"
 cask "rectangle"
 cask "vagrant"
 cask "virtualbox"
+mas "1Password 7", id: 1333542190
+mas "Amphetamine", id: 937984704
+mas "Flycut", id: 442160987
+mas "Gapplin", id: 768053424
+mas "iMovie", id: 408981434
+mas "Keynote", id: 409183694
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
+mas "WhatsApp", id: 1147396723
+mas "Xcode", id: 497799835
+mas "XMind", id: 1327661892
