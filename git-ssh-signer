@@ -1,0 +1,64 @@
+#!/bin/bash
+# Wrapper around ssh-keygen for git commit signing with YubiKey notifications on macOS.
+# Usage: set `git config --global gpg.ssh.program ~/.local/bin/git-ssh-signer`
+#
+# Flow:
+#   1. YubiKey not connected → blocking window "Plug in your YubiKey"
+#      Polls every 300ms; auto-transitions when key is detected.
+#   2. YubiKey connected → blocking window "Touch your YubiKey"
+#      Disappears automatically as soon as ssh-keygen receives the touch.
+
+SSH_KEYGEN=/opt/homebrew/bin/ssh-keygen
+
+yubikey_connected() {
+    ioreg -p IOUSB -l 2>/dev/null | grep -qi "yubikey"
+}
+
+dismiss() {
+    kill "$1" 2>/dev/null
+    wait "$1" 2>/dev/null
+}
+
+# ── Step 1: Wait for YubiKey to be connected ─────────────────────────────────
+if ! yubikey_connected; then
+    osascript -e 'display alert "🔑 YubiKey not connected" message "Plug in your YubiKey to sign the git commit." buttons {"Cancel"} as critical giving up after 120' 2>/dev/null &
+    CONNECT_PID=$!
+
+    while ! yubikey_connected; do
+        sleep 0.3
+        # User clicked Cancel → abort
+        kill -0 "$CONNECT_PID" 2>/dev/null || exit 1
+    done
+
+    dismiss "$CONNECT_PID"
+    sleep 0.15  # let macOS close the first window before opening the next
+fi
+
+# ── Step 2: Ask for touch ─────────────────────────────────────────────────────
+osascript -e 'display alert "🔐 Git Signing" message "Touch your YubiKey to sign the commit." buttons {"Cancel"} giving up after 60' 2>/dev/null &
+TOUCH_PID=$!
+
+# Run ssh-keygen in the background so we can race it against Cancel
+"$SSH_KEYGEN" "$@" &
+SSHKEYGEN_PID=$!
+
+# Wait for whichever finishes first
+while true; do
+    sleep 0.1
+
+    # Touch received → ssh-keygen done
+    if ! kill -0 "$SSHKEYGEN_PID" 2>/dev/null; then
+        wait "$SSHKEYGEN_PID"
+        EXIT_CODE=$?
+        dismiss "$TOUCH_PID"
+        exit $EXIT_CODE
+    fi
+
+    # User clicked Cancel → kill ssh-keygen
+    if ! kill -0 "$TOUCH_PID" 2>/dev/null; then
+        kill "$SSHKEYGEN_PID" 2>/dev/null
+        wait "$SSHKEYGEN_PID"
+        exit 1
+    fi
+done
+
